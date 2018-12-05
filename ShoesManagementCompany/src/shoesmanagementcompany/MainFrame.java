@@ -79,7 +79,6 @@ public class MainFrame extends javax.swing.JFrame {
         pn4 = new Product();
         pn5 = new Import();
         pn6 = new Export();
-        pn7 = new Statistics();
 
         jPanel1.add(pn0);
         jPanel1.add(pn1);
@@ -88,7 +87,6 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel1.add(pn4);
         jPanel1.add(pn5);
         jPanel1.add(pn6);
-        jPanel1.add(pn7);
         pn0.setVisible(true);
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 0, 1220, 710));
@@ -424,7 +422,7 @@ public class MainFrame extends javax.swing.JFrame {
         clicked5 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{cus, imp, exp, prod, prov, statistic});
+        setOpaqueLabel(new JLabel[]{cus, imp, exp, prod, prov,statistic});
         pn1.setVisible(true);
         pn2.setVisible(false);
         pn0.setVisible(false);
@@ -432,7 +430,6 @@ public class MainFrame extends javax.swing.JFrame {
         pn4.setVisible(false);
         pn5.setVisible(false);
         pn6.setVisible(false);
-        pn7.setVisible(false);
     }//GEN-LAST:event_empMouseClicked
 
     private void empMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_empMouseEntered
@@ -456,7 +453,7 @@ public class MainFrame extends javax.swing.JFrame {
         clicked5 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, imp, exp, prod, prov, statistic});
+        setOpaqueLabel(new JLabel[]{emp, imp, exp, prod, prov,statistic});
         pn1.setVisible(false);
         pn2.setVisible(true);
         pn0.setVisible(false);
@@ -464,8 +461,6 @@ public class MainFrame extends javax.swing.JFrame {
         pn4.setVisible(false);
         pn5.setVisible(false);
         pn6.setVisible(false);
-        pn7.setVisible(false);
-
     }//GEN-LAST:event_cusMouseClicked
 
     private void cusMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cusMouseEntered
@@ -488,15 +483,13 @@ public class MainFrame extends javax.swing.JFrame {
         clicked5 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, imp, exp, prod, cus, statistic});
-        pn1.setVisible(false);
+        setOpaqueLabel(new JLabel[]{emp, imp, exp, prod, cus,statistic});
+        pn3.setVisible(true);
         pn2.setVisible(false);
         pn0.setVisible(false);
-        pn3.setVisible(true);
+        pn1.setVisible(false);
         pn4.setVisible(false);
-        pn5.setVisible(false);
-        pn6.setVisible(false);
-        pn7.setVisible(false);
+
     }//GEN-LAST:event_provMouseClicked
 
     private void provMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_provMouseEntered
@@ -519,16 +512,13 @@ public class MainFrame extends javax.swing.JFrame {
         clicked5 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, imp, exp, prov, cus, statistic});
-        pn1.setVisible(false);
+        setOpaqueLabel(new JLabel[]{emp, imp, exp, prov, cus,statistic});
+        pn4.setVisible(true);
         pn2.setVisible(false);
         pn0.setVisible(false);
+        pn1.setVisible(false);
         pn3.setVisible(false);
-        pn4.setVisible(true);
-        pn5.setVisible(false);
-        pn6.setVisible(false);
-        pn7.setVisible(false);
-        pn7.setVisible(false);
+
     }//GEN-LAST:event_prodMouseClicked
 
     private void prodMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_prodMouseEntered
@@ -552,7 +542,7 @@ public class MainFrame extends javax.swing.JFrame {
         clicked4 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, prod, exp, prov, cus, statistic});
+        setOpaqueLabel(new JLabel[]{emp, prod, exp, prov, cus,statistic});
         pn1.setVisible(false);
         pn2.setVisible(false);
         pn0.setVisible(false);
@@ -560,7 +550,6 @@ public class MainFrame extends javax.swing.JFrame {
         pn4.setVisible(false);
         pn5.setVisible(true);
         pn6.setVisible(false);
-        pn7.setVisible(false);
     }//GEN-LAST:event_impMouseClicked
 
     private void impMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_impMouseEntered
@@ -583,7 +572,7 @@ public class MainFrame extends javax.swing.JFrame {
         clicked4 = false;
         clicked5 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, prod, imp, prov, cus, statistic});
+        setOpaqueLabel(new JLabel[]{emp, prod, imp, prov, cus,statistic});
         pn1.setVisible(false);
         pn2.setVisible(false);
         pn0.setVisible(false);
@@ -591,7 +580,6 @@ public class MainFrame extends javax.swing.JFrame {
         pn4.setVisible(false);
         pn5.setVisible(false);
         pn6.setVisible(true);
-        pn7.setVisible(false);
     }//GEN-LAST:event_expMouseClicked
 
     private void expMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_expMouseEntered
@@ -626,7 +614,7 @@ public class MainFrame extends javax.swing.JFrame {
         clicked4 = false;
         clicked5 = false;
         clicked7 = true;
-        setOpaqueLabel(new JLabel[]{emp, prod, imp, prov, cus, exp});
+        setOpaqueLabel(new JLabel[]{emp, prod, imp, prov, cus,exp});
         pn1.setVisible(false);
         pn2.setVisible(false);
         pn0.setVisible(false);
@@ -634,7 +622,6 @@ public class MainFrame extends javax.swing.JFrame {
         pn4.setVisible(false);
         pn5.setVisible(false);
         pn6.setVisible(false);
-        pn7.setVisible(true);
     }//GEN-LAST:event_statisticMouseClicked
 
     private void setClickedColor(JLabel lb) {

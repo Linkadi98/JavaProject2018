@@ -34,8 +34,8 @@
         <Property name="inheritsPopupMenu" type="boolean" value="true"/>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_LayoutCodePost" type="java.lang.String" value="jPanel1.add(pn0);&#xa;jPanel1.add(pn1);&#xa;jPanel1.add(pn2);&#xa;jPanel1.add(pn3);&#xa;jPanel1.add(pn4);&#xa;jPanel1.add(pn5);&#xa;jPanel1.add(pn6);&#xa;jPanel1.add(pn7);&#xa;pn0.setVisible(true);"/>
-        <AuxValue name="JavaCodeGenerator_LayoutCodePre" type="java.lang.String" value="pn0 = new StartPanel();&#xa;pn2 = new Customer();&#xa;pn1 = new Employee();&#xa;pn3 = new Supplier();&#xa;pn4 = new Product();&#xa;pn5 = new Import();&#xa;pn6 = new Export();&#xa;pn7 = new Statistics();"/>
+        <AuxValue name="JavaCodeGenerator_LayoutCodePost" type="java.lang.String" value="jPanel1.add(pn0);&#xa;jPanel1.add(pn1);&#xa;jPanel1.add(pn2);&#xa;jPanel1.add(pn3);&#xa;jPanel1.add(pn4);&#xa;jPanel1.add(pn5);&#xa;jPanel1.add(pn6);&#xa;pn0.setVisible(true);"/>
+        <AuxValue name="JavaCodeGenerator_LayoutCodePre" type="java.lang.String" value="pn0 = new StartPanel();&#xa;pn2 = new Customer();&#xa;pn1 = new Employee();&#xa;pn3 = new Supplier();&#xa;pn4 = new Product();&#xa;pn5 = new Import();&#xa;pn6 = new Export();"/>
       </AuxValues>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
