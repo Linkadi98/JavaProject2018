@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -33,6 +34,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -62,6 +64,20 @@ public class Import extends javax.swing.JPanel {
     public Import() {
         initComponents();
         getListToCombo();
+        tableImport2.setEnabled(false); //chưa load bảng 1 thì bảng 2 ko được phép can thiệp
+
+        /**
+         * ngăn quyền truy cập tới các button khi chưa load CSDL
+         */
+        exportFile.setEnabled(false);
+        insertData1.setEnabled(false);
+        editData1.setEnabled(false);
+        clearData1.setEnabled(false);
+
+        insertData2.setEnabled(false);
+        editData2.setEnabled(false);
+        clearData2.setEnabled(false);
+        jButton7.setEnabled(false);
     }
 
     /**
@@ -82,7 +98,7 @@ public class Import extends javax.swing.JPanel {
         employeeCombo = new javax.swing.JComboBox<>();
         createDay = new javax.swing.JTextField();
         inputInvoice = new javax.swing.JTextField();
-        supplierID = new javax.swing.JComboBox<>();
+        supplierCombo = new javax.swing.JComboBox<>();
         receiveDay = new javax.swing.JTextField();
         jLabel28 = new javax.swing.JLabel();
         jLabel85 = new javax.swing.JLabel();
@@ -98,14 +114,13 @@ public class Import extends javax.swing.JPanel {
         jScrollPane5 = new javax.swing.JScrollPane();
         tableImport2 = new javax.swing.JTable();
         jToolBar4 = new javax.swing.JToolBar();
-        importFile = new javax.swing.JButton();
         exportFile = new javax.swing.JButton();
         jToolBar5 = new javax.swing.JToolBar();
-        viewData = new javax.swing.JButton();
-        clearData = new javax.swing.JButton();
-        insertData = new javax.swing.JButton();
+        viewData1 = new javax.swing.JButton();
         jToolBar6 = new javax.swing.JToolBar();
-        jButton7 = new javax.swing.JButton();
+        insertData1 = new javax.swing.JButton();
+        editData1 = new javax.swing.JButton();
+        clearData1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         employeeName = new javax.swing.JLabel();
         supplierName = new javax.swing.JLabel();
@@ -114,6 +129,12 @@ public class Import extends javax.swing.JPanel {
         lbInputInvoice = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jComboBox1 = new javax.swing.JComboBox<>();
+        jToolBar1 = new javax.swing.JToolBar();
+        insertData2 = new javax.swing.JButton();
+        editData2 = new javax.swing.JButton();
+        clearData2 = new javax.swing.JButton();
+        jToolBar2 = new javax.swing.JToolBar();
+        jButton7 = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setPreferredSize(new java.awt.Dimension(1220, 710));
@@ -141,7 +162,11 @@ public class Import extends javax.swing.JPanel {
         jLabel24.setForeground(new java.awt.Color(0, 102, 255));
         jLabel24.setText("Ngày nhập hàng");
 
-        employeeCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        employeeCombo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                employeeComboMouseClicked(evt);
+            }
+        });
         employeeCombo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 employeeComboActionPerformed(evt);
@@ -151,8 +176,25 @@ public class Import extends javax.swing.JPanel {
         createDay.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
         inputInvoice.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        inputInvoice.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                inputInvoiceActionPerformed(evt);
+            }
+        });
 
-        supplierID.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        supplierCombo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                supplierComboMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                supplierComboMouseEntered(evt);
+            }
+        });
+        supplierCombo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                supplierComboActionPerformed(evt);
+            }
+        });
 
         receiveDay.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
@@ -176,7 +218,11 @@ public class Import extends javax.swing.JPanel {
         jLabel87.setForeground(new java.awt.Color(0, 102, 255));
         jLabel87.setText("Thành tiền");
 
-        productCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        productCombo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                productComboMouseClicked(evt);
+            }
+        });
         productCombo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 productComboActionPerformed(evt);
@@ -218,6 +264,11 @@ public class Import extends javax.swing.JPanel {
         });
         tableImport1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         tableImport1.setRowHeight(25);
+        tableImport1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableImport1MouseClicked(evt);
+            }
+        });
         jScrollPane6.setViewportView(tableImport1);
 
         tableImport2.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
@@ -235,20 +286,15 @@ public class Import extends javax.swing.JPanel {
         ));
         tableImport2.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         tableImport2.setRowHeight(25);
+        tableImport2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableImport2MouseClicked(evt);
+            }
+        });
         jScrollPane5.setViewportView(tableImport2);
 
         jToolBar4.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar4.setRollover(true);
-
-        importFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Microsoft_Excel_37px.png"))); // NOI18N
-        importFile.setToolTipText("Nhập file");
-        importFile.setOpaque(false);
-        importFile.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                importFileActionPerformed(evt);
-            }
-        });
-        jToolBar4.add(importFile);
 
         exportFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Microsoft_Word_37px.png"))); // NOI18N
         exportFile.setToolTipText("Xuất file");
@@ -263,51 +309,57 @@ public class Import extends javax.swing.JPanel {
         jToolBar5.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar5.setRollover(true);
 
-        viewData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Database_View_37px.png"))); // NOI18N
-        viewData.setToolTipText("Hiển thị ");
-        viewData.setOpaque(false);
-        viewData.addActionListener(new java.awt.event.ActionListener() {
+        viewData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/icons8_Refresh_37px.png"))); // NOI18N
+        viewData1.setToolTipText("Hiển thị bảng và reset lại đầu vào");
+        viewData1.setFocusable(false);
+        viewData1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        viewData1.setOpaque(false);
+        viewData1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        viewData1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewDataActionPerformed(evt);
+                viewData1ActionPerformed(evt);
             }
         });
-        jToolBar5.add(viewData);
-
-        clearData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Delete_Database_37px.png"))); // NOI18N
-        clearData.setToolTipText("Xoá bảng");
-        clearData.setFocusable(false);
-        clearData.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        clearData.setOpaque(false);
-        clearData.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        clearData.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clearDataActionPerformed(evt);
-            }
-        });
-        jToolBar5.add(clearData);
-
-        insertData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Add_Database_37px.png"))); // NOI18N
-        insertData.setToolTipText("Thêm");
-        insertData.setOpaque(false);
-        insertData.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                insertDataActionPerformed(evt);
-            }
-        });
-        jToolBar5.add(insertData);
+        jToolBar5.add(viewData1);
 
         jToolBar6.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar6.setRollover(true);
 
-        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Combo_Chart_37px.png"))); // NOI18N
-        jButton7.setToolTipText("Thống kê");
-        jButton7.setOpaque(false);
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
+        insertData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Add_Database_37px.png"))); // NOI18N
+        insertData1.setToolTipText("Thêm hoá đơn nhập");
+        insertData1.setOpaque(false);
+        insertData1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton7ActionPerformed(evt);
+                insertData1ActionPerformed(evt);
             }
         });
-        jToolBar6.add(jButton7);
+        jToolBar6.add(insertData1);
+
+        editData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/edit 37.png"))); // NOI18N
+        editData1.setToolTipText("Sửa hoá đơn nhập");
+        editData1.setFocusable(false);
+        editData1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        editData1.setOpaque(false);
+        editData1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        editData1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editData1ActionPerformed(evt);
+            }
+        });
+        jToolBar6.add(editData1);
+
+        clearData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Delete_Database_37px.png"))); // NOI18N
+        clearData1.setToolTipText("Xoá hoá đơn nhập");
+        clearData1.setFocusable(false);
+        clearData1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        clearData1.setOpaque(false);
+        clearData1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        clearData1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearData1ActionPerformed(evt);
+            }
+        });
+        jToolBar6.add(clearData1);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 102, 255));
@@ -327,11 +379,67 @@ public class Import extends javax.swing.JPanel {
         jLabel5.setForeground(new java.awt.Color(204, 0, 51));
         jLabel5.setText("Chi tiết hóa đơn nhập");
 
+        lbInputInvoice.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         lbInputInvoice.setText("Mã hóa đơn nhập");
 
         jTextField1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jToolBar1.setBackground(new java.awt.Color(255, 255, 255));
+        jToolBar1.setRollover(true);
+
+        insertData2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/insert 37.2.png"))); // NOI18N
+        insertData2.setToolTipText("Thêm hoá đơn chi tiết nhập");
+        insertData2.setFocusable(false);
+        insertData2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        insertData2.setOpaque(false);
+        insertData2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        insertData2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                insertData2ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(insertData2);
+
+        editData2.setBackground(new java.awt.Color(255, 255, 255));
+        editData2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/edit 37 . 2.png"))); // NOI18N
+        editData2.setToolTipText("Sửa hoá đơn chi tiết nhập");
+        editData2.setFocusable(false);
+        editData2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        editData2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        editData2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editData2ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(editData2);
+
+        clearData2.setBackground(new java.awt.Color(255, 255, 255));
+        clearData2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/remove 37.2.png"))); // NOI18N
+        clearData2.setToolTipText("Xoá hoá đơn chi tiết nhập");
+        clearData2.setFocusable(false);
+        clearData2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        clearData2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        clearData2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearData2ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(clearData2);
+
+        jToolBar2.setBackground(new java.awt.Color(255, 255, 255));
+        jToolBar2.setRollover(true);
+
+        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Combo_Chart_37px.png"))); // NOI18N
+        jButton7.setToolTipText("Thống kê");
+        jButton7.setOpaque(false);
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+        jToolBar2.add(jButton7);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -343,83 +451,114 @@ public class Import extends javax.swing.JPanel {
                         .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(12, 12, 12)
+                        .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(34, 34, 34)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(employeeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(createDay)
-                                        .addComponent(inputInvoice)
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                            .addGap(2, 2, 2)
-                                            .addComponent(employeeName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(jLabel1))
+                                            .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addGap(32, 32, 32)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addGap(2, 2, 2)
+                                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                                    .addComponent(receiveDay, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(employeeName, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(createDay, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                .addComponent(supplierName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(employeeCombo, javax.swing.GroupLayout.Alignment.LEADING, 0, 74, Short.MAX_VALUE))))
+                                    .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel28, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel85, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel89, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel86, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel87, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(34, 34, 34)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(productName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(quantity, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
-                                    .addComponent(cost, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
-                                    .addComponent(supplierID, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(productCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(lbInputInvoice, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(receiveDay)
-                                    .addComponent(supplierName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel18)
+                                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(32, 32, 32)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(inputInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(supplierCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(jLabel28, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jLabel85, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jLabel89, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jLabel86, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jLabel87, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addGap(34, 34, 34)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(productName, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(productCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(cost, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(quantity, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(lbInputInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(52, 52, 52)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 742, Short.MAX_VALUE)
-                            .addComponent(jScrollPane5)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(6, 6, 6)
+                        .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(29, 29, 29)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 710, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 710, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(499, 499, 499))))
         );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel1, jLabel18, jLabel20, jLabel21, jLabel23, jLabel24, jLabel4});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {createDay, employeeCombo, employeeName, inputInvoice, receiveDay, supplierCombo});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel28, jLabel85, jLabel86, jLabel87, jLabel89});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {cost, lbInputInvoice, productCombo, productName, quantity});
+
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jToolBar5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jToolBar4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jToolBar6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(10, 10, 10)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(22, 22, 22)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(inputInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(15, 15, 15)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(createDay, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(16, 16, 16)
+                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(supplierCombo))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(supplierName, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(employeeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -427,24 +566,20 @@ public class Import extends javax.swing.JPanel {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(employeeName, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(createDay, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(15, 15, 15)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(supplierID))
-                        .addGap(15, 15, 15)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(supplierName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE))
-                        .addGap(15, 15, 15)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(receiveDay, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
-                            .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(receiveDay, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)))
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(15, 15, 15)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lbInputInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -463,10 +598,16 @@ public class Import extends javax.swing.JPanel {
                         .addGap(15, 15, 15)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(cost, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel87, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap())
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                            .addComponent(jLabel87, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(3, 3, 3))
         );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {cost, createDay, employeeCombo, employeeName, inputInvoice, lbInputInvoice, productCombo, productName, quantity, receiveDay, supplierCombo, supplierName});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel1, jLabel18, jLabel20, jLabel21, jLabel23, jLabel24, jLabel4});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel28, jLabel85, jLabel86, jLabel87, jLabel89});
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -477,80 +618,27 @@ public class Import extends javax.swing.JPanel {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 698, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void productComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productComboActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_productComboActionPerformed
+        Connection connection = ConnectionDB.getConnect();
+        String sql = " SELECT tenSP FROM quanlybangiay.sanpham where maSP ='" + productCombo.getSelectedItem().toString() + "';";
 
-    private void importFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFileActionPerformed
-        // TODO add your handling code here:
-        String path = null;
-        JFileChooser fileChooser = new JFileChooser();
-        // show ra một bảng chọn file
-        int rVal = fileChooser.showOpenDialog(null);
-        // nếu nhấn nút ok (tuỳ chọn APPROVE_OPTION)
-        if (rVal == JFileChooser.APPROVE_OPTION) {
-            String fileName = fileChooser.getSelectedFile().getName();
-            String dir = fileChooser.getCurrentDirectory().toString();
-            path = dir + "\\" + fileName;
-        } // nếu nhấn nút cancel trong bảng
-        else if (rVal == JFileChooser.CANCEL_OPTION) {
-            return;
-        }
-        // chỗ này sẽ delete hết các dòng trước khi nhập dữ liệu từ file
-
-        // vector lưu tên cột
-        Vector columns = new Vector();
         try {
-            FileInputStream file = new FileInputStream(new File(path));
-            // tạo một file excel
-            XSSFWorkbook workbook = new XSSFWorkbook(file);
-            // tạo một sheet trong excel có số thứ tự là 0
-            XSSFSheet sheet = workbook.getSheetAt(0);
-            // con trỏ duyệt hàng trong excel
-            Iterator<Row> rowIt = sheet.iterator();
-            // nếu vẫn còn dòng trong file
-            while (rowIt.hasNext()) {
-                // tạo một dòng mới
-                Row row = rowIt.next();
-                // con trỏ trỏ vào các ô trong một dòng
-                Iterator<Cell> cellIt = row.cellIterator();
-                // nếu là hàng 0
-                if (row.getRowNum() == 0) {
-                    // add tên các cột vào trong bảng jtable
-                    while (cellIt.hasNext()) {
-                        Cell cell = cellIt.next();
-                        columns.add(cell.getStringCellValue());
-                        ((DefaultTableModel) tableImport1.getModel()).setColumnIdentifiers(columns);
-                    }
-                } else {
-                    //vector chứa dữ liệu trong 1 dòng để add vào bảng jtabel
-                    Vector<String> rowData = new Vector<String>();
-                    // nếu vẫn còn ô tiếp theo
-                    while (cellIt.hasNext()) {
-                        // lấy cell trong bảng excel
-                        Cell cell = cellIt.next();
-                        // nếu cell có kiểu dữ liệu là string
-                        if (cell.getCellType() == CellType.STRING) {
-                            rowData.add(cell.getStringCellValue());
-                        } // nếu cell có kiểu dữ liệu là số
-                        else if (cell.getCellType() == CellType.NUMERIC) {
-                            rowData.add(Double.toString(cell.getNumericCellValue()));
-                        }
-                    }
-                    // add dữ liệu vào trong bảng jtable
-                    ((DefaultTableModel) tableImport1.getModel()).addRow(rowData);
-                }
+            PreparedStatement pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                productName.setText(rs.getString("tenSP"));
             }
-        } catch (FileNotFoundException ex) {
-        } catch (IOException ex) {
-            Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    }//GEN-LAST:event_importFileActionPerformed
+    }//GEN-LAST:event_productComboActionPerformed
 
     private void exportFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFileActionPerformed
         // TODO add your handling code here:
@@ -601,101 +689,590 @@ public class Import extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_exportFileActionPerformed
 
-    private void viewDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewDataActionPerformed
-        // TODO add your handling code here:
-
-        ConnectionDB connectDB = new ConnectionDB();
-        Connection connection = connectDB.getConnect();
-        DefaultTableModel tableModel = (DefaultTableModel) tableImport1.getModel();
-        tableModel.setNumRows(0);
-        String sql = "SELECT * FROM quanlybangiay.nhanvien";
-        PreparedStatement pst;
-        int row = 0;
-        try {
-            pst = connection.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();
-            while (rs.next()) {
-                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
-                    rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9)
-                });
-                inserted[row] = true;
-                row++;
-            }
-            tableImport1.setModel(tableModel);
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
-        }
-    }//GEN-LAST:event_viewDataActionPerformed
-
-    private void insertDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertDataActionPerformed
-        // TODO add your handling code here:
-        ConnectionDB connectDB = new ConnectionDB();
-        Connection connection = connectDB.getConnect();
-
-        //        DefaultTableModel tableModel = (DefaultTableModel) tableExport1.getModel();
-        int rows = tableImport1.getRowCount();
-        for (int row = 0; row < rows; row++) {
-            if (!inserted[row] && !isEmptyRow(row)) {
-                String sql = "INSERT INTO quanlybangiay.nhanvien VALUES (?,?,?,?,?,?,?,?,?)";
-                try {
-                    connection.setAutoCommit(false);
-                    PreparedStatement pst = connection.prepareStatement(sql);
-                    pst.setString(1, tableImport1.getValueAt(row, 0).toString());
-                    pst.setString(2, tableImport1.getValueAt(row, 1).toString());
-                    pst.setString(3, tableImport1.getValueAt(row, 2).toString());
-                    pst.setString(4, tableImport1.getValueAt(row, 3).toString());
-                    pst.setString(5, tableImport1.getValueAt(row, 4).toString());
-                    pst.setString(6, tableImport1.getValueAt(row, 5).toString());
-                    pst.setString(7, tableImport1.getValueAt(row, 6).toString());
-                    pst.setString(8, tableImport1.getValueAt(row, 7).toString());
-                    pst.setString(9, tableImport1.getValueAt(row, 8).toString());
-
-                    pst.addBatch();
-                    pst.executeUpdate();
-                    connection.commit();
-
-                } catch (HeadlessException | SQLException ex) {
-                    JOptionPane.showMessageDialog(null, ex.getMessage());
+    /**
+     * Kiểm tra xem khoá chính nhập vào có bị trùng với khoá đã có không Hàm này
+     * có thể dùng cho nhiều bảng, riêng bảng chi tiet thì cần check cả 2 khoá
+     *
+     * @param table : bảng cần kiểm tra
+     * @param input : đầu vào khoá chính
+     */
+    public void checkAdd(JTable table, JTextField input) {
+        TableModel model = table.getModel();
+        int rowCount = model.getRowCount();
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < 1; j++) {
+                if (input.getText().equals(model.getValueAt(i, j).toString())) {
+                    JOptionPane.showMessageDialog(null, "Khoá chính này đã tồn tại ! Đề nghị bạn nhập lại !");
+                    return;
                 }
-                inserted[row] = true;
             }
         }
-        JOptionPane.showMessageDialog(null, "Successfully");
-    }//GEN-LAST:event_insertDataActionPerformed
+    }
+
+    public void checkAddHoaDonChiTietNhap() {
+        TableModel model = tableImport2.getModel();
+        int rowCount = model.getRowCount();
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < 1; j++) {
+                if (lbInputInvoice.getText().equals(model.getValueAt(i, j).toString())
+                        && productCombo.getSelectedItem().toString().equals(model.getValueAt(i, 1))) {
+                    JOptionPane.showMessageDialog(null, "Khoá chính này đã tồn tại ! Đề nghị bạn nhập lại !");
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Lấy các dữ liệu đầu vào cho HoaDonNhap
+     *
+     * @return đối tượng hoaDonNhap
+     */
+    public entity.HoaDonNhap getInputHoaDonNhap() {
+        String maHDN = inputInvoice.getText();
+        String maNCC = supplierCombo.getSelectedItem().toString();
+        String maNV = employeeCombo.getSelectedItem().toString();
+        String ngayLap = createDay.getText();
+        String ngayNhanHang = receiveDay.getText();
+
+        entity.HoaDonNhap hoaDonNhap = new entity.HoaDonNhap(maHDN, maNCC, maNV, ngayLap, ngayNhanHang);
+        return hoaDonNhap;
+    }
+
+    /**
+     * Lấy các dữ liệu đầu vào cho HoaDonChiTietNhap
+     *
+     * @return đối tượng hoaDonNhap
+     */
+    public entity.HoaDonChiTietNhap getInputHoaDonChiTietNhap() {
+        String maHDN = lbInputInvoice.getText();
+        String maSP = productCombo.getSelectedItem().toString();
+        int soLuong = Integer.parseInt(quantity.getText());
+        int thanhTien = Integer.parseInt(this.cost.getText());
+
+        entity.HoaDonChiTietNhap hoaDonChiTietNhap = new entity.HoaDonChiTietNhap(maHDN, maSP, soLuong, thanhTien);
+        return hoaDonChiTietNhap;
+    }
+
+    /**
+     * Thêm dữ liệu hoadonnhap vào database
+     *
+     * @param hoaDonNhap
+     */
+    public void insertHoaDonNhapToDB(entity.HoaDonNhap hoaDonNhap) {
+        String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonnhap` "
+                + "(`maHDN`, `maNCC`, `maNV`, `ngayLap`, `ngayNhanHang`) "
+                + "VALUES (?, ?, ?, ?, ?);";
+        PreparedStatement pst = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            pst = connection.prepareStatement(sqlCommand);
+            pst.setString(1, hoaDonNhap.getMaHDN());
+            pst.setString(2, hoaDonNhap.getMaNCC());
+            pst.setString(3, hoaDonNhap.getMaNV());
+            pst.setString(4, hoaDonNhap.getNgayLap());
+            pst.setString(5, hoaDonNhap.getNgayNhanHang());
+
+            if (pst.executeUpdate() > 0) {
+                System.out.println("insert Successfully");
+            } else {
+                System.out.println("insert failed");
+            }
+        } catch (SQLException e1) {
+            // TODO Auto-generated catch block
+            System.out.println("select error" + e1.toString());
+        }
+    }
+
+    public void insertHoaDonChiTietNhapToDB(entity.HoaDonChiTietNhap hoaDonChiTietNhap) {
+        String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonchitietnhap` "
+                + "(`maHDN`, `maSP`, `soLuong`, `thanhTien`) "
+                + "VALUES (?, ?, ?, ?);";
+        PreparedStatement pst = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            pst = connection.prepareStatement(sqlCommand);
+            pst.setString(1, hoaDonChiTietNhap.getMaHDN());
+            pst.setString(2, hoaDonChiTietNhap.getMaSP());
+            pst.setInt(3, hoaDonChiTietNhap.getSoLuong());
+            pst.setInt(4, hoaDonChiTietNhap.getThanhTien());
+
+            if (pst.executeUpdate() > 0) {
+                System.out.println("insert Successfully");
+            } else {
+                System.out.println("insert failed");
+            }
+        } catch (SQLException e1) {
+            // TODO Auto-generated catch block
+            System.out.println("select error" + e1.toString());
+        }
+    }
+
+    private void insertData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertData1ActionPerformed
+        checkAdd(tableImport1, inputInvoice);
+        entity.HoaDonNhap hoaDonNhap = this.getInputHoaDonNhap();
+        insertHoaDonNhapToDB(hoaDonNhap);
+
+        loadDataToTable(tableImport1);
+        resetInputImport();
+    }//GEN-LAST:event_insertData1ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
         // TODO add your handling code here:
         new ChartFrame().setVisible(true);
     }//GEN-LAST:event_jButton7ActionPerformed
 
-    private void clearDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearDataActionPerformed
-        // TODO add your handling code here:
-        int dialog = JOptionPane.showConfirmDialog(null, "Hành động này sẽ xoá toàn bộ dữ liệu \nBạn có muốn tiếp tục không?\nTip: Nếu bạn không chắc chắn, hãy kiểm tra lại hoặc xoá lần lượt từng hàng một!", "Cảnh báo", JOptionPane.INFORMATION_MESSAGE);
-
-        if(dialog == JOptionPane.YES_OPTION) {
-            ConnectionDB connectionDB = new ConnectionDB();
-            Connection con = connectionDB.getConnect();
-
-            String sql = "deletle from quanlybangiay.nhavien";
-            try {
-                con.setAutoCommit(false);
-                PreparedStatement pst = con.prepareStatement(sql);
-                pst.execute();
-                con.commit();
-                JOptionPane.showMessageDialog(null, "Thành công!");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Không thể xoá dữ liệu\n" + "Lỗi: " + e.getMessage());
-            }
+    private void clearData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearData1ActionPerformed
+        int row = tableImport1.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Delete", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-    }//GEN-LAST:event_clearDataActionPerformed
+        int select = JOptionPane.showOptionDialog(null, "Bạn có muốn xóa?", "Delete", 0, JOptionPane.YES_NO_OPTION, null, null, 1);
+        if (select == 0) {
+            PreparedStatement pst = null;
+            String sqlCommand = "delete from hoadonnhap where MaHDN = ?";
+            try {
+                Connection connection = ConnectionDB.getConnect();
+                pst = connection.prepareStatement(sqlCommand);
+                pst.setString(1, (String) tableImport1.getValueAt(row, 0));
+
+                if (pst.executeUpdate() > 0) {
+                    System.out.println("Delete Successfully");
+                } else {
+                    System.out.println("Delete failed");
+                }
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                System.out.println("delete error" + e.getMessage());
+            }
+
+            loadDataToTable(tableImport1);
+        }
+    }//GEN-LAST:event_clearData1ActionPerformed
 
     private void employeeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeComboActionPerformed
-        // TODO add your handling code here:
+        Connection connection = ConnectionDB.getConnect();
+        String sql = " SELECT hoTen FROM quanlybangiay.nhanvien where MaNV ='" + employeeCombo.getSelectedItem().toString() + "';";
+
+        try {
+            PreparedStatement pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                employeeName.setText(rs.getString("hoTen"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_employeeComboActionPerformed
 
     private void quantityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quantityActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_quantityActionPerformed
+
+    private void inputInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputInvoiceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_inputInvoiceActionPerformed
+
+    /**
+     * load dữ liệu từ database tới các bảng Import
+     *
+     * @param table (tableImport1 || tableImport2)
+     */
+    public void loadDataToTable(JTable table) {
+        if (table.equals(tableImport1)) {
+            DefaultTableModel tableModel = (DefaultTableModel) tableImport1.getModel();
+            tableModel.setNumRows(0);
+            String sql1 = "SELECT * FROM quanlybangiay.hoadonnhap";
+            PreparedStatement pst;
+            Connection connection = ConnectionDB.getConnect();
+            int row = 0;
+            try {
+                pst = connection.prepareStatement(sql1);
+                ResultSet rs = pst.executeQuery();
+                while (rs.next()) {
+                    tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                        rs.getString(3), rs.getString(4), rs.getString(5)
+                    });
+                    inserted[row] = true;
+                    row++;
+                }
+                tableImport1.setModel(tableModel);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+            }
+        }
+        if (table.equals(tableImport2)) {
+            DefaultTableModel tableModel = (DefaultTableModel) tableImport2.getModel();
+            tableModel.setNumRows(0);
+            String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap";
+            PreparedStatement pst;
+            Connection connection = ConnectionDB.getConnect();
+            int row = 0;
+            try {
+                pst = connection.prepareStatement(sql);
+                ResultSet rs = pst.executeQuery();
+                while (rs.next()) {
+                    tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                        rs.getString(3), rs.getString(4)
+                    });
+                    inserted[row] = true;
+                    row++;
+                }
+                tableImport2.setModel(tableModel);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+            }
+        }
+    }
+
+    /**
+     * reset toàn bộ dữ liệu đầu vào chức năng Import
+     */
+    public void resetInputImport() {
+        inputInvoice.setText("");
+        createDay.setText("");
+        employeeName.setText("");
+        supplierName.setText("");
+        receiveDay.setText("");
+        lbInputInvoice.setText("");
+        productName.setText("");
+        quantity.setText("");
+        cost.setText("");
+    }
+    private void viewData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewData1ActionPerformed
+        /**
+         * kích hoạt các nút button
+         */
+        exportFile.setEnabled(true);
+        insertData1.setEnabled(true);
+        editData1.setEnabled(true);
+        clearData1.setEnabled(true);
+
+        insertData2.setEnabled(true);
+        editData2.setEnabled(true);
+        clearData2.setEnabled(true);
+        jButton7.setEnabled(true);
+
+        /**
+         * set lại cho bảng tableImport2 không thể đụng vào
+         */
+        tableImport2.setEnabled(false);
+
+        /**
+         * Load dữ liệu ra cho bảng hoadonnhap
+         */
+        loadDataToTable(tableImport1);
+
+        /**
+         * load dữ liệu ra cho bảng hoadonchitietnhap
+         */
+        loadDataToTable(tableImport2);
+
+        /**
+         * reset lại toàn bộ các đầu vào
+         */
+        resetInputImport();
+
+    }//GEN-LAST:event_viewData1ActionPerformed
+
+    private void insertData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertData2ActionPerformed
+        checkAddHoaDonChiTietNhap();
+        entity.HoaDonChiTietNhap hoaDonChiTietNhap = this.getInputHoaDonChiTietNhap();
+        insertHoaDonChiTietNhapToDB(hoaDonChiTietNhap);
+
+        /**
+         * load ra dữ liệu của bảng hoadonchitietnhap nhưng chỉ xuất theo khoá
+         * đang xét
+         */
+        DefaultTableModel tableModel = (DefaultTableModel) tableImport2.getModel();
+        tableModel.setNumRows(0);
+        String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap where maHDN ='" + lbInputInvoice.getText().toString() + "';";
+        PreparedStatement pst;
+        Connection connection = ConnectionDB.getConnect();
+
+        int row = 0;
+        try {
+            pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                    rs.getString(3), rs.getString(4)
+                });
+                inserted[row] = true;
+                row++;
+            }
+            tableImport2.setModel(tableModel);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+        }
+        resetInputImport();
+    }//GEN-LAST:event_insertData2ActionPerformed
+    
+    /**
+     * Cập nhật hoá đơn nhập
+     * @param hoaDonNhap
+     * @return true nếu update thành công
+     */
+    public boolean updateHoaDonNhap(entity.HoaDonNhap hoaDonNhap){
+        String sqlCommand = "update hoadonnhap"
+                + " set MaHDN = ?, "
+                + "MaNCC = ?, "
+                + "MaNV = ?, "
+                + "ngayLap = ?, "
+                + "ngayNhanHang = ? "
+                
+                + "where MaHDN = ?";        
+
+        PreparedStatement pst = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            pst = connection.prepareStatement(sqlCommand);
+            pst.setString(1, hoaDonNhap.getMaHDN());
+            pst.setString(2, hoaDonNhap.getMaNCC());
+            pst.setString(3, hoaDonNhap.getMaNV());
+            pst.setString(4, hoaDonNhap.getNgayLap());
+            pst.setString(5, hoaDonNhap.getNgayNhanHang());
+            pst.setString(6, lbInputInvoice.getText().toString());
+
+            if (pst.executeUpdate() > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e3) {
+            // TODO Auto-generated catch block
+            System.out.println("update lỗi nhé ! " + e3.getMessage());
+        }
+        return false;
+    }
+    
+    public boolean updateHoaDonChiTietNhap(entity.HoaDonChiTietNhap hoaDonChiTietNhap){
+        String sqlCommand = "update hoadonchitietnhap "
+                + "set MaHDN = ?, "
+                + "MaSP = ?, "
+                + "soLuong = ?, "
+                + "thanhTien = ? "
+                
+                + "where (MaHDN = ?) AND (MaSP = ?);";
+
+        PreparedStatement pst = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            pst = connection.prepareStatement(sqlCommand);
+            pst.setString(1, hoaDonChiTietNhap.getMaHDN());
+            pst.setString(2, hoaDonChiTietNhap.getMaSP());
+            pst.setInt(3, hoaDonChiTietNhap.getSoLuong());
+            pst.setInt(4, hoaDonChiTietNhap.getThanhTien());
+            
+            pst.setString(5, lbInputInvoice.getText());
+            pst.setString(6, productCombo.getSelectedItem().toString());
+
+            if (pst.executeUpdate() > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e3) {
+            // TODO Auto-generated catch block
+            System.out.println("update lỗi nhé ! " + e3.toString());
+        }
+        return false;
+    }
+    private void editData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editData1ActionPerformed
+        int row = tableImport1.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        entity.HoaDonNhap hoaDonNhap = getInputHoaDonNhap();
+        if(updateHoaDonNhap(hoaDonNhap)){
+            JOptionPane.showMessageDialog(null, "Update thành công");
+        }else{
+            JOptionPane.showMessageDialog(null, "Update thất bại");
+        }
+        
+        loadDataToTable(tableImport1);
+    }//GEN-LAST:event_editData1ActionPerformed
+
+    private void employeeComboMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_employeeComboMouseClicked
+
+
+    }//GEN-LAST:event_employeeComboMouseClicked
+
+    private void supplierComboMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_supplierComboMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_supplierComboMouseEntered
+
+    private void supplierComboMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_supplierComboMouseClicked
+
+    }//GEN-LAST:event_supplierComboMouseClicked
+
+    private void productComboMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_productComboMouseClicked
+
+    }//GEN-LAST:event_productComboMouseClicked
+
+    private void tableImport1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableImport1MouseClicked
+
+        tableImport2.setEnabled(true);
+        int row = tableImport1.getSelectedRow();
+        inputInvoice.setText((String) tableImport1.getValueAt(row, 0));
+        createDay.setText((String) tableImport1.getValueAt(row, 3));
+        employeeCombo.setSelectedItem((String) tableImport1.getValueAt(row, 2));
+        supplierCombo.setSelectedItem((String) tableImport1.getValueAt(row, 1));
+        receiveDay.setText((String) tableImport1.getValueAt(row, 4));
+        lbInputInvoice.setText((String) tableImport1.getValueAt(row, 0));
+
+        DefaultTableModel tableModel = (DefaultTableModel) tableImport2.getModel();
+        tableModel.setNumRows(0);
+        String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap where maHDN ='" + lbInputInvoice.getText().toString() + "';";
+        PreparedStatement pst;
+        Connection connection = ConnectionDB.getConnect();
+
+        row = 0;
+        try {
+            pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                    rs.getString(3), rs.getString(4)
+                });
+                inserted[row] = true;
+                row++;
+            }
+            tableImport2.setModel(tableModel);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+        }
+    }//GEN-LAST:event_tableImport1MouseClicked
+
+    private void tableImport2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableImport2MouseClicked
+        int row2 = tableImport2.getSelectedRow();
+        if (lbInputInvoice.getText().equals("")) {
+            lbInputInvoice.setText((String) tableImport2.getValueAt(row2, 0));
+        }
+
+        productCombo.setSelectedItem((String) tableImport2.getValueAt(row2, 1));
+        quantity.setText((String) tableImport2.getValueAt(row2, 2));
+        cost.setText((String) tableImport2.getValueAt(row2, 3));
+    }//GEN-LAST:event_tableImport2MouseClicked
+
+    private void supplierComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supplierComboActionPerformed
+        Connection connection = ConnectionDB.getConnect();
+        String sql = " SELECT tenNCC FROM quanlybangiay.nhacungcap where maNCC ='" + supplierCombo.getSelectedItem().toString() + "';";
+
+        try {
+            PreparedStatement pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                supplierName.setText(rs.getString("tenNCC"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_supplierComboActionPerformed
+
+    private void clearData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearData2ActionPerformed
+        /**
+         * Xoá dữ liệu trong bảng hoadonchitietnhap
+         */
+        int row = tableImport2.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Delete", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int select = JOptionPane.showOptionDialog(null, "Bạn có muốn xóa?", "Delete", 0, JOptionPane.YES_NO_OPTION, null, null, 1);
+        if (select == 0) {
+            PreparedStatement pst = null;
+            String sqlCommand = "delete from hoadonchitietnhap where MaHDN = ?&& maSP = ?";
+            try {
+                Connection connection = ConnectionDB.getConnect();
+                pst = connection.prepareStatement(sqlCommand);
+
+                pst.setString(1, (String) tableImport2.getValueAt(row, 0));
+                pst.setString(2, (String) tableImport2.getValueAt(row, 1));
+
+                if (pst.executeUpdate() > 0) {
+                    System.out.println("Delete Successfully");
+                } else {
+                    System.out.println("Delete failed");
+                }
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                System.out.println("delete error" + e.getMessage());
+            }
+
+        }
+        /**
+         * load ra dữ liệu của bảng hoadonchitietnhap nhưng chỉ xuất theo khoá
+         * đang xét
+         */
+        DefaultTableModel tableModel = (DefaultTableModel) tableImport2.getModel();
+        tableModel.setNumRows(0);
+        String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap where maHDN ='" + lbInputInvoice.getText().toString() + "';";
+        
+        PreparedStatement pst;
+        Connection connection = ConnectionDB.getConnect();
+
+        row = 0;
+        try {
+            pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                    rs.getString(3), rs.getString(4)
+                });
+                inserted[row] = true;
+                row++;
+            }
+            tableImport2.setModel(tableModel);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+        }
+    }//GEN-LAST:event_clearData2ActionPerformed
+
+    private void editData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editData2ActionPerformed
+        int row = tableImport2.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        entity.HoaDonChiTietNhap hoaDonChiTietNhap = getInputHoaDonChiTietNhap();
+        if(updateHoaDonChiTietNhap(hoaDonChiTietNhap)){
+            JOptionPane.showMessageDialog(null, "Update thành công");
+        }else{
+            JOptionPane.showMessageDialog(null, "Update thất bại");
+        }
+        
+        DefaultTableModel tableModel = (DefaultTableModel) tableImport2.getModel();
+        tableModel.setNumRows(0);
+        String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap where maHDN ='" + lbInputInvoice.getText().toString() + "';";
+        
+        PreparedStatement pst;
+        Connection connection = ConnectionDB.getConnect();
+
+        row = 0;
+        try {
+            pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                    rs.getString(3), rs.getString(4)
+                });
+                inserted[row] = true;
+                row++;
+            }
+            tableImport2.setModel(tableModel);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+        }
+    }//GEN-LAST:event_editData2ActionPerformed
+
+    /**
+     * đưa các dữ liệu từ các bảng đơn tới comboBox
+     */
     public void getListToCombo() {
         ConnectionDB conn = new ConnectionDB();
         Connection c = conn.getConnect();
@@ -710,19 +1287,21 @@ public class Import extends javax.swing.JPanel {
             while (rs1.next()) {
                 employeeCombo.addItem(rs1.getString("MaNV"));
             }
-            
+
             ResultSet rs2 = pst2.executeQuery();
             while (rs2.next()) {
-               productCombo.addItem(rs2.getString("MaNCC"));
+                supplierCombo.addItem(rs2.getString("MaNCC"));
             }
-            
+
             ResultSet rs3 = pst3.executeQuery();
             while (rs3.next()) {
                 productCombo.addItem(rs3.getString("MaSP"));
             }
         } catch (Exception e) {
         }
-    }    private boolean isEmptyRow(int row) {
+    }
+
+    private boolean isEmptyRow(int row) {
         DefaultTableModel tableModel = (DefaultTableModel) tableImport1.getModel();
         for (int i = 0; i < tableImport1.getColumnCount(); i++) {
             String data = (String) tableImport1.getValueAt(row, i);
@@ -754,18 +1333,22 @@ public class Import extends javax.swing.JPanel {
         for (int i = 1; i < table.getRows().size(); i++) {
             table.removeRow(1);
         }
-    }  public boolean[] inserted = new boolean[100000];
+    }
+    public boolean[] inserted = new boolean[100000];
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton clearData;
+    private javax.swing.JButton clearData1;
+    private javax.swing.JButton clearData2;
     private javax.swing.JTextField cost;
     private javax.swing.JTextField createDay;
+    private javax.swing.JButton editData1;
+    private javax.swing.JButton editData2;
     private javax.swing.JComboBox<String> employeeCombo;
     private javax.swing.JLabel employeeName;
     private javax.swing.JButton exportFile;
-    private javax.swing.JButton importFile;
     private javax.swing.JTextField inputInvoice;
-    private javax.swing.JButton insertData;
+    private javax.swing.JButton insertData1;
+    private javax.swing.JButton insertData2;
     private javax.swing.JButton jButton7;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
@@ -785,6 +1368,8 @@ public class Import extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JToolBar jToolBar2;
     private javax.swing.JToolBar jToolBar4;
     private javax.swing.JToolBar jToolBar5;
     private javax.swing.JToolBar jToolBar6;
@@ -793,10 +1378,10 @@ public class Import extends javax.swing.JPanel {
     private javax.swing.JLabel productName;
     private javax.swing.JTextField quantity;
     private javax.swing.JTextField receiveDay;
-    private javax.swing.JComboBox<String> supplierID;
+    private javax.swing.JComboBox<String> supplierCombo;
     private javax.swing.JLabel supplierName;
     public javax.swing.JTable tableImport1;
     public javax.swing.JTable tableImport2;
-    private javax.swing.JButton viewData;
+    private javax.swing.JButton viewData1;
     // End of variables declaration//GEN-END:variables
 }

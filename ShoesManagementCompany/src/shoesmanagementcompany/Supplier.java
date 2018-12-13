@@ -429,6 +429,8 @@ public class Supplier extends javax.swing.JPanel {
 
                 } catch (HeadlessException | SQLException ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage());
+                    ((DefaultTableModel) tableSupplier.getModel()).removeRow(row);
+                    return;
                 }
                 inserted[row] = true;
             }

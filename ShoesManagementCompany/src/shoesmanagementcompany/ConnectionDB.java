@@ -14,11 +14,12 @@ import java.sql.SQLException;
  * @author Pham Ngoc Minh
  */
 public class ConnectionDB {
-    public Connection getConnect() {
+    public static Connection getConnect() {
         Connection connection = null;
-        String url = "jdbc:mysql://localhost:3306/quanlybangiay?autoReconnect=true&useSSL=false";
+        String url = "jdbc:mysql://localhost:3306/quanlybangiay"
+            + "? useUnicode=true&characterEncoding=UTF-8";
         String user = "root";
-        String passwd = "1234"; //Lưu ý mật khẩu ở đây nha Mạnh ???
+        String passwd = ""; //Lưu ý mật khẩu ở đây nha Mạnh ???
         try {
             connection = DriverManager.getConnection(url, user, passwd);
         } catch (SQLException e) {

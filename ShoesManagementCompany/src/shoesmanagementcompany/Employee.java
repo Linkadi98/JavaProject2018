@@ -385,6 +385,8 @@ public class Employee extends javax.swing.JPanel {
 
                 } catch (HeadlessException | SQLException ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage());
+                    ((DefaultTableModel) employeeTable.getModel()).removeRow(row);
+                    return;
                 }
                 inserted[row] = true;
             }

@@ -94,13 +94,15 @@ public class Export extends javax.swing.JPanel {
         jScrollPane5 = new javax.swing.JScrollPane();
         tableExport2 = new javax.swing.JTable();
         jToolBar4 = new javax.swing.JToolBar();
-        importFile = new javax.swing.JButton();
         exportFile = new javax.swing.JButton();
         jToolBar5 = new javax.swing.JToolBar();
         viewData = new javax.swing.JButton();
         clearData = new javax.swing.JButton();
         insertData = new javax.swing.JButton();
         jToolBar6 = new javax.swing.JToolBar();
+        viewData1 = new javax.swing.JButton();
+        clearData1 = new javax.swing.JButton();
+        insertData1 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         employeeName = new javax.swing.JLabel();
@@ -220,16 +222,6 @@ public class Export extends javax.swing.JPanel {
         jToolBar4.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar4.setRollover(true);
 
-        importFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Microsoft_Excel_37px.png"))); // NOI18N
-        importFile.setToolTipText("Nhập file");
-        importFile.setOpaque(false);
-        importFile.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                importFileActionPerformed(evt);
-            }
-        });
-        jToolBar4.add(importFile);
-
         exportFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Microsoft_Word_37px.png"))); // NOI18N
         exportFile.setToolTipText("Xuất file");
         exportFile.setOpaque(false);
@@ -278,6 +270,42 @@ public class Export extends javax.swing.JPanel {
 
         jToolBar6.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar6.setRollover(true);
+
+        viewData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Database_View_37px.png"))); // NOI18N
+        viewData1.setToolTipText("Hiển thị ");
+        viewData1.setOpaque(false);
+        viewData1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewData1ActionPerformed(evt);
+            }
+        });
+        jToolBar6.add(viewData1);
+
+        clearData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Delete_Database_37px.png"))); // NOI18N
+        clearData1.setToolTipText("Xoá bảng");
+        clearData1.setFocusable(false);
+        clearData1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        clearData1.setOpaque(false);
+        clearData1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        clearData1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearData1ActionPerformed(evt);
+            }
+        });
+        jToolBar6.add(clearData1);
+
+        insertData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Add_Database_37px.png"))); // NOI18N
+        insertData1.setToolTipText("Thêm");
+        insertData1.setFocusable(false);
+        insertData1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        insertData1.setOpaque(false);
+        insertData1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        insertData1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                insertData1ActionPerformed(evt);
+            }
+        });
+        jToolBar6.add(insertData1);
 
         jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Combo_Chart_37px.png"))); // NOI18N
         jButton7.setToolTipText("Thống kê");
@@ -367,8 +395,8 @@ public class Export extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(52, 52, 52)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 676, Short.MAX_VALUE)
-                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 676, Short.MAX_VALUE))
+                            .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 606, Short.MAX_VALUE)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 606, Short.MAX_VALUE))
                         .addGap(10, 10, 10))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -445,79 +473,14 @@ public class Export extends javax.swing.JPanel {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(cost)
                             .addComponent(jLabel87, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap())
-                    .addComponent(jScrollPane5)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {cost, customerID, employeeCombo, exportDay, productCombo, quantity});
 
     }// </editor-fold>//GEN-END:initComponents
-
-    private void importFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFileActionPerformed
-        // TODO add your handling code here:
-        String path = null;
-        JFileChooser fileChooser = new JFileChooser();
-        // show ra một bảng chọn file
-        int rVal = fileChooser.showOpenDialog(null);
-        // nếu nhấn nút ok (tuỳ chọn APPROVE_OPTION)
-        if (rVal == JFileChooser.APPROVE_OPTION) {
-            String fileName = fileChooser.getSelectedFile().getName();
-            String dir = fileChooser.getCurrentDirectory().toString();
-            path = dir + "\\" + fileName;
-        } // nếu nhấn nút cancel trong bảng
-        else if (rVal == JFileChooser.CANCEL_OPTION) {
-            return;
-        }
-        // chỗ này sẽ delete hết các dòng trước khi nhập dữ liệu từ file
-
-        // vector lưu tên cột
-        Vector columns = new Vector();
-        try {
-            FileInputStream file = new FileInputStream(new File(path));
-            // tạo một file excel
-            XSSFWorkbook workbook = new XSSFWorkbook(file);
-            // tạo một sheet trong excel có số thứ tự là 0
-            XSSFSheet sheet = workbook.getSheetAt(0);
-            // con trỏ duyệt hàng trong excel
-            Iterator<Row> rowIt = sheet.iterator();
-            // nếu vẫn còn dòng trong file
-            while (rowIt.hasNext()) {
-                // tạo một dòng mới
-                Row row = rowIt.next();
-                // con trỏ trỏ vào các ô trong một dòng
-                Iterator<Cell> cellIt = row.cellIterator();
-                // nếu là hàng 0
-                if (row.getRowNum() == 0) {
-                    // add tên các cột vào trong bảng jtable
-                    while (cellIt.hasNext()) {
-                        Cell cell = cellIt.next();
-                        columns.add(cell.getStringCellValue());
-                        ((DefaultTableModel) tableExport1.getModel()).setColumnIdentifiers(columns);
-                    }
-                } else {
-                    //vector chứa dữ liệu trong 1 dòng để add vào bảng jtabel
-                    Vector<String> rowData = new Vector<String>();
-                    // nếu vẫn còn ô tiếp theo
-                    while (cellIt.hasNext()) {
-                        // lấy cell trong bảng excel
-                        Cell cell = cellIt.next();
-                        // nếu cell có kiểu dữ liệu là string
-                        if (cell.getCellType() == CellType.STRING) {
-                            rowData.add(cell.getStringCellValue());
-                        } // nếu cell có kiểu dữ liệu là số
-                        else if (cell.getCellType() == CellType.NUMERIC) {
-                            rowData.add(Double.toString(cell.getNumericCellValue()));
-                        }
-                    }
-                    // add dữ liệu vào trong bảng jtable
-                    ((DefaultTableModel) tableExport1.getModel()).addRow(rowData);
-                }
-            }
-        } catch (FileNotFoundException ex) {
-        } catch (IOException ex) {
-            Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_importFileActionPerformed
     private boolean isEmptyRow(int row) {
         DefaultTableModel tableModel = (DefaultTableModel) tableExport1.getModel();
         for (int i = 0; i < tableExport1.getColumnCount(); i++) {
@@ -697,9 +660,22 @@ public class Export extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_costActionPerformed
 
+    private void viewData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewData1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_viewData1ActionPerformed
+
+    private void insertData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertData1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_insertData1ActionPerformed
+
+    private void clearData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearData1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_clearData1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearData;
+    private javax.swing.JButton clearData1;
     private javax.swing.JTextField cost;
     private javax.swing.JTextField createDay;
     private javax.swing.JComboBox<String> customerID;
@@ -709,8 +685,8 @@ public class Export extends javax.swing.JPanel {
     private javax.swing.JTextField exportDay;
     private javax.swing.JButton exportFile;
     private javax.swing.JTextField exportInvoice;
-    private javax.swing.JButton importFile;
     private javax.swing.JButton insertData;
+    private javax.swing.JButton insertData1;
     private javax.swing.JButton jButton7;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
@@ -739,5 +715,6 @@ public class Export extends javax.swing.JPanel {
     public javax.swing.JTable tableExport1;
     public javax.swing.JTable tableExport2;
     private javax.swing.JButton viewData;
+    private javax.swing.JButton viewData1;
     // End of variables declaration//GEN-END:variables
 }

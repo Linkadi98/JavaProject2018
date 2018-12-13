@@ -321,6 +321,8 @@ public class Customer extends javax.swing.JPanel {
 
                 } catch (HeadlessException | SQLException ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage());
+                    ((DefaultTableModel) tableCustomer.getModel()).removeRow(row);
+                    return;
                 }
                 inserted[row] = true;
             }

@@ -468,6 +468,8 @@ public class Product extends javax.swing.JPanel {
 
                 } catch (HeadlessException | SQLException ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage());
+                    ((DefaultTableModel) tableProduct.getModel()).removeRow(row);
+                    return;
                 }
                 inserted[row] = true;
             }
