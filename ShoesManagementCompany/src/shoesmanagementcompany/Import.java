@@ -1113,7 +1113,7 @@ public class Import extends javax.swing.JPanel {
             pst.setString(5, hoaDonNhap.getNgayNhanHang());
 
             if (pst.executeUpdate() > 0) {
-
+                JOptionPane.showMessageDialog(null, "Bạn đã thêm thành công.");
             } else {
                 JOptionPane.showMessageDialog(null, "Thêm thất bại !");
             }
@@ -1126,8 +1126,11 @@ public class Import extends javax.swing.JPanel {
         String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonchitietnhap` "
                 + "(`maHDN`, `maSP`, `soLuong`, `thanhTien`) "
                 + "VALUES (?, ?, ?, ?);";
-        String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `tongSoLuong` = `tongSoLuong` + " + quantity.getText()
+        String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET "
+                + "`tongSoLuong` = `tongSoLuong` + " + quantity.getText()
+                + ",`soLuongCon` = `soLuongCon` + " + quantity.getText()
                 + " WHERE (`maSP` = '" + productCombo.getSelectedItem().toString() + "');";
+
         PreparedStatement pst = null;
         Connection connection = ConnectionDB.getConnect();
         try {
@@ -1143,6 +1146,7 @@ public class Import extends javax.swing.JPanel {
                     PreparedStatement ps = connection.prepareStatement(sqlUpdate);
                     ps.executeUpdate();
                 }
+                JOptionPane.showMessageDialog(null, "Bạn đã thêm thành công.");
             } else {
                 JOptionPane.showMessageDialog(null, "Không thể thêm ! Xin kiểm tra lại !");
             }
@@ -1156,7 +1160,6 @@ public class Import extends javax.swing.JPanel {
         checkAdd(tableImport1, inputInvoice);
         entity.HoaDonNhap hoaDonNhap = this.getInputHoaDonNhap();
         insertHoaDonNhapToDB(hoaDonNhap);
-
         loadDataToTable(tableImport1);
         resetInputImport();
     }//GEN-LAST:event_insertData1ActionPerformed
@@ -1177,7 +1180,7 @@ public class Import extends javax.swing.JPanel {
                 pst.setString(1, (String) tableImport1.getValueAt(row, 0));
 
                 if (pst.executeUpdate() > 0) {
-
+                    JOptionPane.showMessageDialog(null, "Bạn đã xóa thành công.");
                 } else {
                     JOptionPane.showMessageDialog(null, "Xoá thất bại !");
                 }
@@ -1388,8 +1391,10 @@ public class Import extends javax.swing.JPanel {
                 int row = tableImport1.getSelectedRow();
                 if (tableImport1.getValueAt(row, 4).toString().equals("0000-00-00") && !receiveDay.getText().equals("")) {
                     for (int i = 0; i < tableImport2.getRowCount(); i++) {
-                        String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `tongSoLuong` = `tongSoLuong` + "
-                                + tableImport2.getValueAt(i, 2) + " WHERE (`maSP` = '" + tableImport2.getValueAt(i, 1) + "');";
+                        String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET "
+                                + "`tongSoLuong` = `tongSoLuong` + " + tableImport2.getValueAt(i, 2)
+                                + ", `soLuongCon` = `soLuongCon` + " + tableImport2.getValueAt(i, 2)
+                                + " WHERE (`maSP` = '" + tableImport2.getValueAt(i, 1) + "');";
                         PreparedStatement ps = connection.prepareStatement(sqlUpdate);
                         ps.executeUpdate();
                     }
@@ -1400,7 +1405,7 @@ public class Import extends javax.swing.JPanel {
             }
         } catch (SQLException e3) {
             // TODO Auto-generated catch block
-            System.out.println("update lỗi nhé ! " + e3.getMessage());
+            e3.printStackTrace();
         }
         return false;
     }
@@ -1429,19 +1434,21 @@ public class Import extends javax.swing.JPanel {
                 if (!tableImport1.getValueAt(tableImport1.getSelectedRow(), 4).toString().equals("")) {
                     int s1 = Integer.parseInt(tableImport2.getValueAt(tableImport2.getSelectedRow(), 2).toString());
                     int s2 = Integer.parseInt(quantity.getText().toString());
-                    String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `tongSoLuong` = `tongSoLuong` + "
-                            + (s2 - s1)
+                    String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET "
+                            + "`tongSoLuong` = `tongSoLuong` + " + (s2 - s1)
+                            + ", `soLuongCon` = `soLuongCon` + " + (s2 - s1)
                             + "  WHERE (`maSP` = '" + productCombo.getSelectedItem().toString() + "');";
                     PreparedStatement ps = connection.prepareStatement(sqlUpdate);
                     ps.executeUpdate();
                 }
+                JOptionPane.showMessageDialog(null, "Bạn đã sửa thành công.");
                 return true;
             } else {
                 return false;
             }
         } catch (SQLException e3) {
             // TODO Auto-generated catch block
-            System.out.println("update lỗi nhé ! " + e3.toString());
+             e3.printStackTrace();
         }
         return false;
     }
@@ -1453,9 +1460,9 @@ public class Import extends javax.swing.JPanel {
         }
         entity.HoaDonNhap hoaDonNhap = getInputHoaDonNhap();
         if (updateHoaDonNhap(hoaDonNhap)) {
-            JOptionPane.showMessageDialog(null, "Update thành công");
+            JOptionPane.showMessageDialog(null, "Bạn đã sửa thành công");
         } else {
-            JOptionPane.showMessageDialog(null, "Update thất bại");
+            JOptionPane.showMessageDialog(null, "Sửa thất bại");
         }
 
         loadDataToTable(tableImport1);
@@ -1566,7 +1573,7 @@ public class Import extends javax.swing.JPanel {
                 pst.setString(2, (String) tableImport2.getValueAt(row, 1));
 
                 if (pst.executeUpdate() > 0) {
-
+                    JOptionPane.showMessageDialog(null, "Bạn đã xóa thành công.");
                 } else {
                     JOptionPane.showConfirmDialog(null, "Xoá thất bại! Xin kiểm tra lại!");
                 }
@@ -1612,9 +1619,9 @@ public class Import extends javax.swing.JPanel {
         }
         entity.HoaDonChiTietNhap hoaDonChiTietNhap = getInputHoaDonChiTietNhap();
         if (updateHoaDonChiTietNhap(hoaDonChiTietNhap)) {
-            JOptionPane.showMessageDialog(null, "Update thành công");
+            JOptionPane.showMessageDialog(null, "Bạn đã sửa thành công");
         } else {
-            JOptionPane.showMessageDialog(null, "Update thất bại");
+            JOptionPane.showMessageDialog(null, "Sửa thất bại");
         }
 
         DefaultTableModel tableModel = (DefaultTableModel) tableImport2.getModel();

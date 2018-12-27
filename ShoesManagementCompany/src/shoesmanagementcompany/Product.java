@@ -406,8 +406,8 @@ public class Product extends javax.swing.JPanel {
     }//GEN-LAST:event_viewDataActionPerformed
 
     private void clearDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearDataActionPerformed
-        // TODO add your handling code here:
-        int dialog = JOptionPane.showConfirmDialog(null, "Hành động này sẽ xoá toàn bộ dữ liệu \nBạn có muốn tiếp tục không?\nTip: Nếu bạn không chắc chắn, hãy kiểm tra lại hoặc xoá lần lượt từng hàng một!", "Cảnh báo", JOptionPane.INFORMATION_MESSAGE);
+         // TODO add your handling code here:
+        int dialog = JOptionPane.showConfirmDialog(null,"Hành động này sẽ xóa toàn bộ dữ liệu trong database. Bạn có chắc mình muốn xóa ?");
 
         if (dialog == JOptionPane.YES_OPTION) {
             ConnectionDB connectionDB = new ConnectionDB();
@@ -536,7 +536,7 @@ public class Product extends javax.swing.JPanel {
                         ResultSet rs = st.executeQuery(sql);
                         while (rs.next()) {
                             Vector<String> vector = new Vector<>();
-                            for (int i = 0; i < 11; i++) {
+                            for (int i = 0; i < 13; i++) {
                                 vector.add(rs.getString(i + 1));
                             }
                             ((DefaultTableModel) tableProduct.getModel()).addRow(vector);
@@ -555,7 +555,7 @@ public class Product extends javax.swing.JPanel {
                         
                         while (rs.next()) {
                             Vector<String> vector = new Vector<>();
-                            for (int i = 0; i < 11; i++) {
+                            for (int i = 0; i < 13; i++) {
                                 vector.add(rs.getString(i + 1));
                             }
                             ((DefaultTableModel) tableProduct.getModel()).addRow(vector);
@@ -572,7 +572,7 @@ public class Product extends javax.swing.JPanel {
                         
                         while (rs.next()) {
                             Vector<String> vector = new Vector<>();
-                            for (int i = 0; i < 11; i++) {
+                            for (int i = 0; i < 13; i++) {
                                 vector.add(rs.getString(i + 1));
                             }
                             ((DefaultTableModel) tableProduct.getModel()).addRow(vector);
@@ -589,7 +589,7 @@ public class Product extends javax.swing.JPanel {
                         
                         while (rs.next()) {
                             Vector<String> vector = new Vector<>();
-                            for (int i = 0; i < 11; i++) {
+                            for (int i = 0; i < 13; i++) {
                                 vector.add(rs.getString(i + 1));
                             }
                             ((DefaultTableModel) tableProduct.getModel()).addRow(vector);
@@ -606,7 +606,7 @@ public class Product extends javax.swing.JPanel {
                    
                         while (rs.next()) {
                              Vector<String> vector = new Vector<>();
-                            for (int i = 0; i < 11; i++) {
+                            for (int i = 0; i < 13; i++) {
                                 vector.add(rs.getString(i + 1));
                             }
                             ((DefaultTableModel) tableProduct.getModel()).addRow(vector);
@@ -623,7 +623,7 @@ public class Product extends javax.swing.JPanel {
                         
                         while (rs.next()) {
                             Vector<String> vector = new Vector<>();
-                            for (int i = 0; i < 11; i++) {
+                            for (int i = 0; i < 13; i++) {
                                 vector.add(rs.getString(i + 1));
                             }
                             ((DefaultTableModel) tableProduct.getModel()).addRow(vector);
@@ -640,7 +640,7 @@ public class Product extends javax.swing.JPanel {
                         
                         while (rs.next()) {
                             Vector<String> vector = new Vector<>();
-                            for (int i = 0; i < 11; i++) {
+                            for (int i = 0; i < 13; i++) {
                                 vector.add(rs.getString(i + 1));
                             }
                             ((DefaultTableModel) tableProduct.getModel()).addRow(vector);
@@ -657,7 +657,7 @@ public class Product extends javax.swing.JPanel {
                         
                         while (rs.next()) {
                             Vector<String> vector = new Vector<>();
-                            for (int i = 0; i < 11; i++) {
+                            for (int i = 0; i < 13; i++) {
                                 
                                 vector.add(rs.getString(i + 1));
                             }

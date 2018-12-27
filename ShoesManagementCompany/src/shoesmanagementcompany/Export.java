@@ -1111,7 +1111,7 @@ public class Export extends javax.swing.JPanel {
             pst.setString(5, hoaDonXuat.getNgayXuatHang());
 
             if (pst.executeUpdate() > 0) {
-
+                JOptionPane.showMessageDialog(null, "Bạn đã thêm thành công.");
             } else {
                 JOptionPane.showMessageDialog(null, "Thêm thất bại !");
             }
@@ -1141,12 +1141,13 @@ public class Export extends javax.swing.JPanel {
                     PreparedStatement ps = connection.prepareStatement(sqlUpdate);
                     ps.executeUpdate();
                 }
+                JOptionPane.showMessageDialog(null, "Bạn đã thêm thành công.");
             } else {
                 JOptionPane.showMessageDialog(null, "Không thể thêm ! Xin kiểm tra lại !");
             }
         } catch (SQLException e1) {
             // TODO Auto-generated catch block
-            
+
             JOptionPane.showMessageDialog(null, "Không thể thêm ! Xin kiểm tra lại !" + e1.getMessage());
         }
     }
@@ -1176,7 +1177,7 @@ public class Export extends javax.swing.JPanel {
                 pst.setString(1, (String) tableExport1.getValueAt(row, 0));
 
                 if (pst.executeUpdate() > 0) {
-
+                    JOptionPane.showMessageDialog(null, "Bạn đã xóa thành công.");
                 } else {
                     JOptionPane.showMessageDialog(null, "Xoá thất bại !");
                 }
@@ -1394,6 +1395,7 @@ public class Export extends javax.swing.JPanel {
                         ps.executeUpdate();
                     }
                 }
+                JOptionPane.showMessageDialog(null, "Bạn đã sửa thành công.");
                 return true;
             } else {
                 return false;
@@ -1426,7 +1428,7 @@ public class Export extends javax.swing.JPanel {
             pst.setString(6, productCombo.getSelectedItem().toString());
 
             if (pst.executeUpdate() > 0) {
-                if (!tableExport1.getValueAt(tableExport1.getSelectedRow(), 4).toString().equals("")) {
+                if (!tableExport1.getValueAt(tableExport1.getSelectedRow(), 4).toString().equals("0000-00-00")) {
                     int s1 = Integer.parseInt(tableExport2.getValueAt(tableExport2.getSelectedRow(), 2).toString());
                     int s2 = Integer.parseInt(quantity.getText().toString());
                     String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `soLuongCon` = `soLuongCon` + "
@@ -1566,7 +1568,7 @@ public class Export extends javax.swing.JPanel {
                 pst.setString(2, (String) tableExport2.getValueAt(row, 1));
 
                 if (pst.executeUpdate() > 0) {
-
+                    JOptionPane.showMessageDialog(null, "Bạn đã xóa thành công.");
                 } else {
                     JOptionPane.showConfirmDialog(null, "Xoá thất bại! Xin kiểm tra lại!");
                 }
@@ -1605,14 +1607,14 @@ public class Export extends javax.swing.JPanel {
     }//GEN-LAST:event_clearData2ActionPerformed
 
     private void editData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editData2ActionPerformed
-         int row = tableExport2.getSelectedRow();
+        int row = tableExport2.getSelectedRow();
         if (row < 0) {
             JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
             return;
         }
         entity.HoaDonChiTietXuat hoaDonChiTietXuat = getInputHoaDonChiTietXuat();
         if (updateHoaDonChiTietXuat(hoaDonChiTietXuat)) {
-            JOptionPane.showMessageDialog(null, "Update thành công");
+            JOptionPane.showMessageDialog(null, "Bạn đã sửa thành công");
         } else {
             JOptionPane.showMessageDialog(null, "Update thất bại");
         }
