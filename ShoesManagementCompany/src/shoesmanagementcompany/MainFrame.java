@@ -424,10 +424,10 @@ public class MainFrame extends javax.swing.JFrame {
         clicked5 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{cus, imp, exp, prod, prov,statistic});
+        setOpaqueLabel(new JLabel[]{cus, imp, exp, prod, prov, statistic});
+        pn0.setVisible(false);
         pn1.setVisible(true);
         pn2.setVisible(false);
-        pn0.setVisible(false);
         pn3.setVisible(false);
         pn4.setVisible(false);
         pn5.setVisible(false);
@@ -456,10 +456,10 @@ public class MainFrame extends javax.swing.JFrame {
         clicked5 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, imp, exp, prod, prov,statistic});
+        setOpaqueLabel(new JLabel[]{emp, imp, exp, prod, prov, statistic});
+        pn0.setVisible(false);
         pn1.setVisible(false);
         pn2.setVisible(true);
-        pn0.setVisible(false);
         pn3.setVisible(false);
         pn4.setVisible(false);
         pn5.setVisible(false);
@@ -487,7 +487,7 @@ public class MainFrame extends javax.swing.JFrame {
         clicked5 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, imp, exp, prod, cus,statistic});                
+        setOpaqueLabel(new JLabel[]{emp, imp, exp, prod, cus, statistic});
         pn0.setVisible(false);
         pn1.setVisible(false);
         pn2.setVisible(false);
@@ -518,12 +518,14 @@ public class MainFrame extends javax.swing.JFrame {
         clicked5 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, imp, exp, prov, cus,statistic});
-        pn4.setVisible(true);
-        pn2.setVisible(false);
+        setOpaqueLabel(new JLabel[]{emp, imp, exp, prov, cus, statistic});
         pn0.setVisible(false);
         pn1.setVisible(false);
+        pn2.setVisible(false);
         pn3.setVisible(false);
+        pn4.setVisible(true);
+        pn5.setVisible(false);
+        pn6.setVisible(false);
         pn7.setVisible(false);
     }//GEN-LAST:event_prodMouseClicked
 
@@ -548,10 +550,10 @@ public class MainFrame extends javax.swing.JFrame {
         clicked4 = false;
         clicked6 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, prod, exp, prov, cus,statistic});
+        setOpaqueLabel(new JLabel[]{emp, prod, exp, prov, cus, statistic});
+        pn0.setVisible(false);
         pn1.setVisible(false);
         pn2.setVisible(false);
-        pn0.setVisible(false);
         pn3.setVisible(false);
         pn4.setVisible(false);
         pn5.setVisible(true);
@@ -579,10 +581,10 @@ public class MainFrame extends javax.swing.JFrame {
         clicked4 = false;
         clicked5 = false;
         clicked7 = false;
-        setOpaqueLabel(new JLabel[]{emp, prod, imp, prov, cus,statistic});
+        setOpaqueLabel(new JLabel[]{emp, prod, imp, prov, cus, statistic});
+        pn0.setVisible(false);
         pn1.setVisible(false);
         pn2.setVisible(false);
-        pn0.setVisible(false);
         pn3.setVisible(false);
         pn4.setVisible(false);
         pn5.setVisible(false);
@@ -613,7 +615,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_statisticMouseExited
 
     private void statisticMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_statisticMouseClicked
-         // TODO add your handling code here:
+        // TODO add your handling code here:
         setClickedColor(statistic);
         clicked6 = false;
         clicked1 = false;
@@ -622,10 +624,10 @@ public class MainFrame extends javax.swing.JFrame {
         clicked4 = false;
         clicked5 = false;
         clicked7 = true;
-        setOpaqueLabel(new JLabel[]{emp, prod, imp, prov, cus,exp});
+        setOpaqueLabel(new JLabel[]{emp, prod, imp, prov, cus, exp});
+        pn0.setVisible(false);
         pn1.setVisible(false);
         pn2.setVisible(false);
-        pn0.setVisible(false);
         pn3.setVisible(false);
         pn4.setVisible(false);
         pn5.setVisible(false);

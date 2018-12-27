@@ -15,25 +15,34 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
@@ -42,23 +51,40 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
+import org.apache.poi.xwpf.usermodel.TableRowAlign;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import shoesmanagementcompany.*;
 
 /**
  *
  * @author Pham Ngoc Minh
  */
 public class Export extends javax.swing.JPanel {
-  public boolean[] inserted = new boolean[100000];
+
     /**
      * Creates new form Export
      */
     public Export() {
         initComponents();
+        getListToCombo();
+        //tableImport2.setEnabled(false); //chưa load bảng 1 thì bảng 2 ko được phép can thiệp
+
+        /**
+         * ngăn quyền truy cập tới các button khi chưa load CSDL
+         */
+        exportFile.setEnabled(false);
+        insertData1.setEnabled(false);
+        editData1.setEnabled(false);
+        clearData1.setEnabled(false);
+
+        insertData2.setEnabled(false);
+        editData2.setEnabled(false);
+        clearData2.setEnabled(false);
     }
 
     /**
@@ -70,6 +96,7 @@ public class Export extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
         jLabel18 = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
         jLabel21 = new javax.swing.JLabel();
@@ -78,7 +105,7 @@ public class Export extends javax.swing.JPanel {
         employeeCombo = new javax.swing.JComboBox<>();
         createDay = new javax.swing.JTextField();
         exportInvoice = new javax.swing.JTextField();
-        customerID = new javax.swing.JComboBox<>();
+        customerCombo = new javax.swing.JComboBox<>();
         exportDay = new javax.swing.JTextField();
         jLabel28 = new javax.swing.JLabel();
         jLabel85 = new javax.swing.JLabel();
@@ -88,7 +115,6 @@ public class Export extends javax.swing.JPanel {
         productCombo = new javax.swing.JComboBox<>();
         productName = new javax.swing.JLabel();
         quantity = new javax.swing.JTextField();
-        cost = new javax.swing.JTextField();
         jScrollPane6 = new javax.swing.JScrollPane();
         tableExport1 = new javax.swing.JTable();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -96,14 +122,11 @@ public class Export extends javax.swing.JPanel {
         jToolBar4 = new javax.swing.JToolBar();
         exportFile = new javax.swing.JButton();
         jToolBar5 = new javax.swing.JToolBar();
-        viewData = new javax.swing.JButton();
-        clearData = new javax.swing.JButton();
-        insertData = new javax.swing.JButton();
-        jToolBar6 = new javax.swing.JToolBar();
         viewData1 = new javax.swing.JButton();
-        clearData1 = new javax.swing.JButton();
+        jToolBar6 = new javax.swing.JToolBar();
         insertData1 = new javax.swing.JButton();
-        jButton7 = new javax.swing.JButton();
+        editData1 = new javax.swing.JButton();
+        clearData1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         employeeName = new javax.swing.JLabel();
         customerName = new javax.swing.JLabel();
@@ -112,9 +135,20 @@ public class Export extends javax.swing.JPanel {
         lbExportInvoice = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jComboBox1 = new javax.swing.JComboBox<>();
+        jToolBar1 = new javax.swing.JToolBar();
+        insertData2 = new javax.swing.JButton();
+        editData2 = new javax.swing.JButton();
+        clearData2 = new javax.swing.JButton();
+        jToolBar2 = new javax.swing.JToolBar();
+        cost = new javax.swing.JLabel();
+        properties = new javax.swing.JComboBox<>();
+        searchBox = new javax.swing.JTextField();
 
         setBackground(new java.awt.Color(255, 255, 255));
-        setPreferredSize(new java.awt.Dimension(1150, 710));
+        setPreferredSize(new java.awt.Dimension(1220, 710));
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setPreferredSize(new java.awt.Dimension(1150, 710));
 
         jLabel18.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel18.setForeground(new java.awt.Color(0, 102, 255));
@@ -136,13 +170,41 @@ public class Export extends javax.swing.JPanel {
         jLabel24.setForeground(new java.awt.Color(0, 102, 255));
         jLabel24.setText("Ngày xuất hàng");
 
-        employeeCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        employeeCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Chọn mã nhân viên" }));
+        employeeCombo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                employeeComboMouseClicked(evt);
+            }
+        });
+        employeeCombo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                employeeComboActionPerformed(evt);
+            }
+        });
 
         createDay.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
         exportInvoice.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        exportInvoice.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportInvoiceActionPerformed(evt);
+            }
+        });
 
-        customerID.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        customerCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Chọn mã khách hàng" }));
+        customerCombo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                customerComboMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                customerComboMouseEntered(evt);
+            }
+        });
+        customerCombo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                customerComboActionPerformed(evt);
+            }
+        });
 
         exportDay.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
@@ -166,7 +228,12 @@ public class Export extends javax.swing.JPanel {
         jLabel87.setForeground(new java.awt.Color(0, 102, 255));
         jLabel87.setText("Thành tiền");
 
-        productCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        productCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Chọn mã sản phẩm" }));
+        productCombo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                productComboMouseClicked(evt);
+            }
+        });
         productCombo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 productComboActionPerformed(evt);
@@ -177,11 +244,9 @@ public class Export extends javax.swing.JPanel {
         productName.setText("Tên sản phẩm");
 
         quantity.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-
-        cost.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        cost.addActionListener(new java.awt.event.ActionListener() {
+        quantity.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                costActionPerformed(evt);
+                quantityActionPerformed(evt);
             }
         });
 
@@ -197,9 +262,22 @@ public class Export extends javax.swing.JPanel {
             new String [] {
                 "Mã Hoá đơn xuất", "Mã khách hàng", "Mã nhân viên", "Ngày lập", "Ngày xuất hàng"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         tableExport1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         tableExport1.setRowHeight(25);
+        tableExport1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableExport1MouseClicked(evt);
+            }
+        });
         jScrollPane6.setViewportView(tableExport1);
 
         tableExport2.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
@@ -212,11 +290,16 @@ public class Export extends javax.swing.JPanel {
                 {null, null, null, null}
             },
             new String [] {
-                "Mã Hoá đơn xuất", "Mã sản phẩm", "Số lượng", "Thành tiền"
+                "Mã hóa đơn xuất", "Mã sản phẩm", "Số lượng", "Thành tiền"
             }
         ));
         tableExport2.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         tableExport2.setRowHeight(25);
+        tableExport2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableExport2MouseClicked(evt);
+            }
+        });
         jScrollPane5.setViewportView(tableExport2);
 
         jToolBar4.setBackground(new java.awt.Color(255, 255, 255));
@@ -235,54 +318,47 @@ public class Export extends javax.swing.JPanel {
         jToolBar5.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar5.setRollover(true);
 
-        viewData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Database_View_37px.png"))); // NOI18N
-        viewData.setToolTipText("Hiển thị ");
-        viewData.setOpaque(false);
-        viewData.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewDataActionPerformed(evt);
-            }
-        });
-        jToolBar5.add(viewData);
-
-        clearData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Delete_Database_37px.png"))); // NOI18N
-        clearData.setToolTipText("Xoá bảng");
-        clearData.setFocusable(false);
-        clearData.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        clearData.setOpaque(false);
-        clearData.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        clearData.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clearDataActionPerformed(evt);
-            }
-        });
-        jToolBar5.add(clearData);
-
-        insertData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Add_Database_37px.png"))); // NOI18N
-        insertData.setToolTipText("Thêm");
-        insertData.setOpaque(false);
-        insertData.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                insertDataActionPerformed(evt);
-            }
-        });
-        jToolBar5.add(insertData);
-
-        jToolBar6.setBackground(new java.awt.Color(255, 255, 255));
-        jToolBar6.setRollover(true);
-
-        viewData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Database_View_37px.png"))); // NOI18N
-        viewData1.setToolTipText("Hiển thị ");
+        viewData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/icons8_Refresh_37px.png"))); // NOI18N
+        viewData1.setToolTipText("Hiển thị bảng và reset lại đầu vào");
+        viewData1.setFocusable(false);
+        viewData1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         viewData1.setOpaque(false);
+        viewData1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         viewData1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 viewData1ActionPerformed(evt);
             }
         });
-        jToolBar6.add(viewData1);
+        jToolBar5.add(viewData1);
+
+        jToolBar6.setBackground(new java.awt.Color(255, 255, 255));
+        jToolBar6.setRollover(true);
+
+        insertData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Add_Database_37px.png"))); // NOI18N
+        insertData1.setToolTipText("Thêm hoá đơn xuất");
+        insertData1.setOpaque(false);
+        insertData1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                insertData1ActionPerformed(evt);
+            }
+        });
+        jToolBar6.add(insertData1);
+
+        editData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/edit 37.png"))); // NOI18N
+        editData1.setToolTipText("Sửa hoá đơn xuất");
+        editData1.setFocusable(false);
+        editData1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        editData1.setOpaque(false);
+        editData1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        editData1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editData1ActionPerformed(evt);
+            }
+        });
+        jToolBar6.add(editData1);
 
         clearData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Delete_Database_37px.png"))); // NOI18N
-        clearData1.setToolTipText("Xoá bảng");
+        clearData1.setToolTipText("Xoá hoá đơn xuất");
         clearData1.setFocusable(false);
         clearData1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         clearData1.setOpaque(false);
@@ -293,29 +369,6 @@ public class Export extends javax.swing.JPanel {
             }
         });
         jToolBar6.add(clearData1);
-
-        insertData1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Add_Database_37px.png"))); // NOI18N
-        insertData1.setToolTipText("Thêm");
-        insertData1.setFocusable(false);
-        insertData1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        insertData1.setOpaque(false);
-        insertData1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        insertData1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                insertData1ActionPerformed(evt);
-            }
-        });
-        jToolBar6.add(insertData1);
-
-        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Combo_Chart_37px.png"))); // NOI18N
-        jButton7.setToolTipText("Thống kê");
-        jButton7.setOpaque(false);
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton7ActionPerformed(evt);
-            }
-        });
-        jToolBar6.add(jButton7);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 102, 255));
@@ -342,145 +395,1530 @@ public class Export extends javax.swing.JPanel {
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
+        jToolBar1.setBackground(new java.awt.Color(255, 255, 255));
+        jToolBar1.setRollover(true);
+
+        insertData2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/insert 37.2.png"))); // NOI18N
+        insertData2.setToolTipText("Thêm hoá đơn chi tiết xuất");
+        insertData2.setFocusable(false);
+        insertData2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        insertData2.setOpaque(false);
+        insertData2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        insertData2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                insertData2ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(insertData2);
+
+        editData2.setBackground(new java.awt.Color(255, 255, 255));
+        editData2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/edit 37 . 2.png"))); // NOI18N
+        editData2.setToolTipText("Sửa hoá đơn chi tiết xuất");
+        editData2.setFocusable(false);
+        editData2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        editData2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        editData2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editData2ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(editData2);
+
+        clearData2.setBackground(new java.awt.Color(255, 255, 255));
+        clearData2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/remove 37.2.png"))); // NOI18N
+        clearData2.setToolTipText("Xoá hoá đơn chi tiết xuất");
+        clearData2.setFocusable(false);
+        clearData2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        clearData2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        clearData2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearData2ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(clearData2);
+
+        jToolBar2.setBackground(new java.awt.Color(255, 255, 255));
+        jToolBar2.setRollover(true);
+
+        cost.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+
+        properties.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        properties.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tìm kiếm theo", "Mã hoá đơn xuất", "Mã khách hàng", "Mã nhân viên", "Mã sản phẩm", "Ngày nhập hàng" }));
+        properties.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                propertiesActionPerformed(evt);
+            }
+        });
+
+        searchBox.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        searchBox.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                searchBoxMouseEntered(evt);
+            }
+        });
+        searchBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchBoxActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(12, 12, 12)
+                        .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(jLabel1))
+                                            .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addGap(32, 32, 32)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addGap(2, 2, 2)
+                                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                                    .addComponent(exportDay, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(employeeName, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(createDay, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                .addComponent(customerName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(employeeCombo, javax.swing.GroupLayout.Alignment.LEADING, 0, 74, Short.MAX_VALUE))))
+                                    .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel18)
+                                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(32, 32, 32)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(exportInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(customerCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabel28, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel85, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel89, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel86, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel87, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lbExportInvoice, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
+                                    .addComponent(productCombo, javax.swing.GroupLayout.Alignment.TRAILING, 0, 75, Short.MAX_VALUE)
+                                    .addComponent(productName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
+                                    .addComponent(quantity, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
+                                    .addComponent(cost, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(29, 29, 29)
+                        .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(84, 84, 84)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(29, 29, 29)
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 710, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 710, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(499, 499, 499))))
+        );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel1, jLabel18, jLabel20, jLabel21, jLabel23, jLabel24, jLabel4});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {createDay, customerCombo, employeeCombo, employeeName, exportDay, exportInvoice});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel28, jLabel85, jLabel86, jLabel87, jLabel89});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {cost, lbExportInvoice, productCombo, productName, quantity});
+
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jToolBar5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jToolBar4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jToolBar6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jToolBar1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(22, 22, 22))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(exportInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(15, 15, 15)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(customerCombo))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(customerName, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(employeeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(15, 15, 15)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(employeeName, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(createDay, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(15, 15, 15)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(exportDay, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)))
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lbExportInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(productCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel85, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(15, 15, 15)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(productName, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel89, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(15, 15, 15)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(quantity, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel86, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(15, 15, 15)
+                                .addComponent(jLabel87, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cost))))))
+        );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {cost, createDay, customerCombo, customerName, employeeCombo, employeeName, exportDay, exportInvoice, jLabel5, lbExportInvoice, productCombo, productName, quantity});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel1, jLabel18, jLabel20, jLabel21, jLabel23, jLabel24, jLabel4});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel28, jLabel85, jLabel86, jLabel87, jLabel89});
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(34, 34, 34)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(employeeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(createDay, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
-                                        .addComponent(exportInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(employeeName, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel28, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel85, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel89, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel86, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel87, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(34, 34, 34)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(exportDay, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
-                                    .addComponent(productName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(quantity, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(cost, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(customerID, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(customerName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(productCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(lbExportInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(52, 52, 52)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 606, Short.MAX_VALUE)
-                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 606, Short.MAX_VALUE))
-                        .addGap(10, 10, 10))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(29, 29, 29)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())))
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 1220, Short.MAX_VALUE)
         );
-
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {cost, createDay, exportDay, quantity});
-
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(10, 10, 10)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(exportInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(createDay, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(employeeCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(employeeName, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(customerID))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(customerName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(exportDay, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
-                            .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lbExportInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(productCombo)
-                            .addComponent(jLabel85, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(productName, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel89, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(quantity)
-                            .addComponent(jLabel86, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(cost)
-                            .addComponent(jLabel87, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 698, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
-
-        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {cost, customerID, employeeCombo, exportDay, productCombo, quantity});
-
     }// </editor-fold>//GEN-END:initComponents
+
+    private void productComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productComboActionPerformed
+        Connection connection = ConnectionDB.getConnect();
+        String sql = " SELECT tenSP FROM quanlybangiay.sanpham where maSP ='" + productCombo.getSelectedItem().toString() + "';";
+
+        try {
+            PreparedStatement pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                productName.setText(rs.getString("tenSP"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_productComboActionPerformed
+
+    /**
+     * Lấy tên Nhà cung cấp
+     *
+     * @param maNCC
+     * @return
+     */
+    public String getTenKH(String maKH) {
+        String hoTen = null;
+        String sql = "SELECT hoTen "
+                + "FROM  khachhang "
+                + "WHERE maKH = '" + maKH + "';";
+        PreparedStatement ps = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                hoTen = rs.getString("hoTen");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+        return hoTen;
+    }
+
+    /**
+     * Lấy tên nhân viên
+     *
+     * @param maNV
+     * @return
+     */
+    public String getTenNV(String maNV) {
+        String tenNV = null;
+        String sql = "SELECT hoTen "
+                + "FROM  nhanvien "
+                + "WHERE MaNV = '" + maNV + "';";
+        PreparedStatement ps = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                tenNV = rs.getString("hoTen");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+        return tenNV;
+    }
+
+    /**
+     * Lấy tên sản phẩm từ mã sản phẩm
+     *
+     * @param maKH
+     * @return
+     */
+    public String getTenSP(String maSP) {
+        String tenSP = null;
+        String sql = "SELECT tenSP "
+                + "FROM  sanpham "
+                + "WHERE maSP = '" + maSP + "';";
+        PreparedStatement ps = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                tenSP = rs.getString("tenSP");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+        return tenSP;
+    }
+
+    /*------------------------------------------- Xuất File --------------------------------------------------*/
+    // Xuất hoá đơn xuất
+    public void xuatPhieu(XWPFDocument doc, String fileName) {
+        try {
+            InputStream file = new FileInputStream(fileName);
+            Iterator bodyElementIterator = doc.getBodyElementsIterator();
+
+            for (XWPFParagraph p : doc.getParagraphs()) {
+                List<XWPFRun> runs = p.getRuns();
+                if (runs != null) {
+                    for (XWPFRun r : runs) {
+                        r.setFontSize(12);
+                        r.setFontFamily("Times New Roman");
+                        String text = r.getText(0);
+                        if (text != null) {
+                            if (text.contains("HDX")) {
+                                text = text.replace("HDX", tableExport1.getValueAt(0, 0).toString() + "      ");
+                                r.addBreak();
+                                r.setText(text, 0);
+                            }
+
+                            if (text.contains("ABC")) {
+                                text = text.replace("ABC", "                       Mã khách hàng: "
+                                        + tableExport1.getValueAt(0, 1).toString() + "                                    "
+                                        + "Tên khách hàng: "
+                                        + getTenKH(tableExport1.getValueAt(0, 1).toString()));
+                                r.addBreak();
+                                r.setText(text, 0);
+
+                            }
+
+                            if (text.contains("NVx")) {
+                                text = text.replace("NVx", "                       Mã nhân viên: "
+                                        + tableExport1.getValueAt(0, 2).toString() + "                                       "
+                                        + "Tên nhân viên: "
+                                        + getTenNV(tableExport1.getValueAt(0, 2).toString()));
+                                r.addBreak();
+                                r.setText(text, 0);
+
+                            }
+
+                            if (text.contains("yyyyMMDD")) {
+                                text = text.replace("yyyyMMDD", "                       Ngày lập: "
+                                        + tableExport1.getValueAt(0, 3).toString() + "                                   "
+                                        + "Ngày nhận hàng: "
+                                        + tableExport1.getValueAt(0, 4).toString());
+                                r.addBreak();
+                                r.setText(text, 0);
+                            }
+                            if (text.contains("tiencpxxx")) {
+                                int tongSoTien = 0;
+
+                                for (int i = 0; i < tableExport2.getRowCount(); i++) {
+                                    tongSoTien += Integer.parseInt(tableExport2.getValueAt(i, 3).toString());
+                                }
+                                text = text.replace("tiencpxxx", "                        Tổng số tiền: " + tongSoTien);
+                                r.addBreak();
+                                r.setText(text, 0);
+                                break;
+                            }
+                            if (text.contains("ngayxxx")) {
+                                SimpleDateFormat day = new SimpleDateFormat("dd");
+                                SimpleDateFormat month = new SimpleDateFormat("MM");
+                                SimpleDateFormat year = new SimpleDateFormat("yyyy");
+                                Date date = new Date();
+                                String ngay = day.format(date);
+                                String thang = month.format(date);
+                                String nam = year.format(date);
+                                text = text.replace("ngayxxx", "Ngày  " + ngay + "  Tháng  " + thang + "  Năm  " + nam);
+                                r.setText(text, 0);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            while (bodyElementIterator.hasNext()) {
+                IBodyElement element = (IBodyElement) bodyElementIterator.next();
+                if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
+                    //Danh sách tất cả Table trong file word
+                    List<XWPFTable> tableList = element.getBody().getTables();
+                    for (XWPFTable table : tableList) {
+                        //Căn bảng ở giữa file
+                        table.setTableAlignment(TableRowAlign.CENTER);
+
+                        //  Xóa các dòng thừa trước khi thêm mới
+                        while (table.getRow(1) != null) {
+                            table.removeRow(1);
+                        }
+                        //Thêm các dòng từ jTable vào table trong word
+                        for (int i = 1; i <= tableExport2.getRowCount(); i++) {
+
+                            XWPFTableRow newRow = table.createRow();
+                            newRow.getCell(0).setText(i + "");
+                            newRow.getCell(1).setText(tableExport2.getValueAt(i - 1, 0).toString());
+                            newRow.getCell(2).setText(tableExport2.getValueAt(i - 1, 1).toString());
+                            newRow.getCell(3).setText(getTenSP(tableExport2.getValueAt(i - 1, 1).toString()));
+                            newRow.getCell(4).setText(tableExport2.getValueAt(i - 1, 2).toString());
+                            newRow.getCell(5).setText(tableExport2.getValueAt(i - 1, 3).toString());
+
+                        }
+                    }
+                }
+            }
+
+            OutputStream fOut = new FileOutputStream("Hoá đơn xuất.docx");
+            doc.write(fOut);
+            fOut.close();
+        } catch (IOException ex) {
+            JOptionPane.showConfirmDialog(null, ex.getMessage());
+            Logger.getLogger(Export.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        String fileOut = System.getProperty("user.home")
+                + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\"
+                + "Hoá đơn xuất.docx";
+        try {
+            File myFile = new File(fileOut);
+            Desktop.getDesktop().open(myFile);
+        } catch (IOException ex) {
+            JOptionPane.showConfirmDialog(null, ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    private void exportFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFileActionPerformed
+        String fileName = null;
+        String f0 = System.getProperty("user.home");
+        String f1 = "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\Quản Lý Xuất\\";
+        String f2 = null;
+        String sql = null;
+
+        if (properties.getSelectedItem().toString().equals("Tìm kiếm theo") || searchBox.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn tiêu chuẩn tìm kiếm");
+            return;
+        }
+
+        if (properties.getSelectedItem().toString().equals("Mã hoá đơn xuất")) {
+            f2 = "Hoá đơn xuất.docx";
+        } else if (properties.getSelectedItem().toString().equals("Mã khách hàng")) {
+
+            f2 = "Tìm kiếm theo mã khách hàng.docx";
+            sql = "SELECT A.maHDX, maSP, maKH, maNV, ngayXuatHang, ngayLap, soLuong, thanhTien\n"
+                    + "from hoadonxuat A join hoadonchitietxuat B \n"
+                    + "on A.maHDX = B.maHDX \n"
+                    + "where A.maKH = \"" + searchBox.getText() + "\";";
+
+        } else if (properties.getSelectedItem().toString().equals("Mã nhân viên")) {
+            //JOptionPane.showMessageDialog(null, "OK");
+
+            f2 = "Tìm kiếm theo mã nhân viên.docx";
+            sql = "SELECT A.maHDX, maSP, maKH, maNV, ngayXuatHang, ngayLap, soLuong, thanhTien\n"
+                    + "from hoadonxuat A join hoadonchitietxuat B \n"
+                    + "on A.maHDX = B.maHDX \n"
+                    + "where A.maNV = \"" + searchBox.getText() + "\";";
+
+        } else if (properties.getSelectedItem().toString().equals("Mã sản phẩm")) {
+
+            f2 = "Tìm kiếm theo mã sản phẩm.docx";
+            sql = "SELECT A.maHDX, maSP, maKH, maNV, ngayXuatHang, ngayLap, soLuong, thanhTien\n"
+                    + "from hoadonxuat A join hoadonchitietxuat B \n"
+                    + "on A.maHDX = B.maHDX \n"
+                    + "where B.maSP = \"" + searchBox.getText() + "\";";
+
+        } else if (properties.getSelectedItem().toString().equals("Ngày xuất hàng")) {
+
+            f2 = "Tìm kiếm theo ngày xuất hàng.docx";
+            sql = "SELECT A.maHDX, maSP, maKH, maNV, ngayXuatHang, ngayLap, soLuong, thanhTien\n"
+                    + "from hoadonxuat A join hoadonchitietxuat B \n"
+                    + "on A.maHDX = B.maHDX \n"
+                    + "where A.ngayXuatHang = \"" + searchBox.getText() + "\";";
+
+        }
+
+        fileName = f0 + f1 + f2;
+
+        try {
+            InputStream file = new FileInputStream(fileName);
+            XWPFDocument docx = new XWPFDocument(OPCPackage.open(file));
+            Iterator bodyElementIterator = docx.getBodyElementsIterator();
+            //Nếu là xuất phiếu mượn thì sửa form
+            if (f2.equals("Hoá đơn xuất.docx")) {
+                xuatPhieu(docx, fileName);
+            } else {
+                for (XWPFParagraph p : docx.getParagraphs()) {
+                    List<XWPFRun> runs = p.getRuns();
+                    if (runs != null) {
+                        for (XWPFRun r : runs) {
+                            r.setFontSize(12);
+                            r.setFontFamily("Times New Roman");
+                            String text = r.getText(0);
+                            if (text != null) {
+                                if (text.contains("ngayxxx")) {
+                                    SimpleDateFormat day = new SimpleDateFormat("dd");
+                                    SimpleDateFormat month = new SimpleDateFormat("MM");
+                                    SimpleDateFormat year = new SimpleDateFormat("yyyy");
+                                    Date date = new Date();
+                                    String ngay = day.format(date);
+                                    String thang = month.format(date);
+                                    String nam = year.format(date);
+                                    text = text.replace("ngayxxx", "Ngày  " + ngay + "  Tháng  " + thang + "  Năm  " + nam);
+                                    r.setText(text, 0);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                while (bodyElementIterator.hasNext()) {
+                    IBodyElement element = (IBodyElement) bodyElementIterator.next();
+                    if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
+                        //Danh sách tất cả Table trong file word
+                        List<XWPFTable> tableList = element.getBody().getTables();
+                        for (XWPFTable table : tableList) {
+                            //Căn bảng ở giữa file
+                            table.setTableAlignment(TableRowAlign.CENTER);
+                            //  Xóa các dòng thừa trước khi thêm mới
+                            while (table.getRow(1) != null) {
+                                table.removeRow(1);
+                            }
+                            int i = 0;
+                            //Thêm các dòng từ jTable vào table trong word
+                            PreparedStatement ps = null;
+                            Connection connection = ConnectionDB.getConnect();
+                            try {
+                                ps = connection.prepareStatement(sql);
+                                ResultSet rs = ps.executeQuery();
+                                while (rs.next()) {
+                                    XWPFTableRow newRow = table.createRow();
+                                    newRow.getCell(0).setText(++i + "");
+                                    for (int j = 1; j < 9; j++) {
+
+                                        newRow.getCell(j).setText(rs.getString(j));
+                                    }
+                                }
+                            } catch (SQLException ex) {
+                                Logger.getLogger(Import.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                        }
+                    }
+                }
+                OutputStream fOut = new FileOutputStream(f2);
+                docx.write(fOut);
+                fOut.close();
+                //Mở file
+                try {
+                    File myFile = new File(f0 + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\" + f2);
+                    Desktop.getDesktop().open(myFile);
+                } catch (IOException ex) {
+                    // no application registered for PDFs
+                    JOptionPane.showConfirmDialog(null, ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        } catch (IOException | InvalidFormatException ex) {
+            JOptionPane.showConfirmDialog(null, ex.getMessage());
+            Logger.getLogger(Import.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_exportFileActionPerformed
+
+    /**
+     * Kiểm tra xem khoá chính nhập vào có bị trùng với khoá đã có không Hàm này
+     * có thể dùng cho nhiều bảng, riêng bảng chi tiet thì cần check cả 2 khoá
+     *
+     * @param table : bảng cần kiểm tra
+     * @param input : đầu vào khoá chính
+     */
+    public void checkAdd(JTable table, JTextField input) {
+        TableModel model = table.getModel();
+        int rowCount = model.getRowCount();
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < 1; j++) {
+                if (input.getText().equals(model.getValueAt(i, j).toString())) {
+                    JOptionPane.showMessageDialog(null, "Khoá chính này đã tồn tại ! Đề nghị bạn nhập lại !");
+                    return;
+                }
+            }
+        }
+    }
+
+    public void checkAddHoaDonChiTietXuat() {
+        TableModel model = tableExport2.getModel();
+        int rowCount = model.getRowCount();
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < 1; j++) {
+                if (lbExportInvoice.getText().equals(model.getValueAt(i, j).toString())
+                        && productCombo.getSelectedItem().toString().equals(model.getValueAt(i, 1))) {
+                    JOptionPane.showMessageDialog(null, "Khoá chính này đã tồn tại ! Đề nghị bạn nhập lại !");
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Lấy các dữ liệu đầu vào cho HoaDonXuat
+     *
+     * @return đối tượng hoaDonXuat
+     */
+    public entity.HoaDonXuat getInputHoaDonXuat() {
+        String maHDX = exportInvoice.getText();
+        String maKH = customerCombo.getSelectedItem().toString();
+        String maNV = employeeCombo.getSelectedItem().toString();
+        String ngayLap = createDay.getText();
+        String ngayXuatHang = exportDay.getText();
+
+        entity.HoaDonXuat hoaDonXuat = new entity.HoaDonXuat(maHDX, maKH, maNV, ngayLap, ngayXuatHang);
+        return hoaDonXuat;
+    }
+
+    /**
+     * Lấy các dữ liệu đầu vào cho HoaDonChiTietXuat
+     *
+     * @return đối tượng hoaDonXuat
+     */
+    public entity.HoaDonChiTietXuat getInputHoaDonChiTietXuat() {
+        String maHDX = lbExportInvoice.getText();
+        String maSP = productCombo.getSelectedItem().toString();
+        int soLuong = Integer.parseInt(quantity.getText());
+        Connection connection = ConnectionDB.getConnect();
+        String sql = " SELECT donGiaXuat FROM quanlybangiay.sanpham where maSP ='" + maSP + "';";
+
+        int donGiaXuat = 0;
+        try {
+            PreparedStatement pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                donGiaXuat = Integer.parseInt(rs.getString("donGiaXuat"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        int thanhTien = donGiaXuat * soLuong;
+
+        entity.HoaDonChiTietXuat hoaDonChiTietXuat = new entity.HoaDonChiTietXuat(maHDX, maSP, soLuong, thanhTien);
+        return hoaDonChiTietXuat;
+    }
+
+    /**
+     * Thêm dữ liệu hoadonxuat vào database
+     *
+     * @param hoaDonXuat
+     */
+    public void insertHoaDonXuatToDB(entity.HoaDonXuat hoaDonXuat) {
+        String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonxuat` "
+                + "(`maHDX`, `maKH`, `maNV`, `ngayLap`, `ngayXuatHang`) "
+                + "VALUES (?, ?, ?, ?, ?);";
+        PreparedStatement pst = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            pst = connection.prepareStatement(sqlCommand);
+            pst.setString(1, hoaDonXuat.getMaHDX());
+            pst.setString(2, hoaDonXuat.getMaKH());
+            pst.setString(3, hoaDonXuat.getMaNV());
+            pst.setString(4, hoaDonXuat.getNgayLap());
+            pst.setString(5, hoaDonXuat.getNgayXuatHang());
+
+            if (pst.executeUpdate() > 0) {
+
+            } else {
+                JOptionPane.showMessageDialog(null, "Thêm thất bại !");
+            }
+        } catch (SQLException e1) {
+            JOptionPane.showMessageDialog(null, "Thêm thất bại ! Xin kiểm tra lại !");
+        }
+    }
+
+    public void insertHoaDonChiTietXuatToDB(entity.HoaDonChiTietXuat hoaDonChiTietXuat) {
+        String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonchitietxuat` "
+                + "(`maHDX`, `maSP`, `soLuong`, `thanhTien`) "
+                + "VALUES (?, ?, ?, ?);";
+        String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `soLuongCon` = `soLuongCon` - " + quantity.getText()
+                + " WHERE (`maSP` = '" + productCombo.getSelectedItem().toString() + "');";
+        PreparedStatement pst = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            pst = connection.prepareStatement(sqlCommand);
+            pst.setString(1, hoaDonChiTietXuat.getMaHDX());
+            pst.setString(2, hoaDonChiTietXuat.getMaSP());
+            pst.setInt(3, hoaDonChiTietXuat.getSoLuong());
+            pst.setInt(4, hoaDonChiTietXuat.getThanhTien());
+
+            if (pst.executeUpdate() >= 0) {
+                int row = tableExport1.getSelectedRow();
+                if (!tableExport1.getValueAt(row, 4).toString().equals("0000-00-00")) {
+                    PreparedStatement ps = connection.prepareStatement(sqlUpdate);
+                    ps.executeUpdate();
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Không thể thêm ! Xin kiểm tra lại !");
+            }
+        } catch (SQLException e1) {
+            // TODO Auto-generated catch block
+            
+            JOptionPane.showMessageDialog(null, "Không thể thêm ! Xin kiểm tra lại !" + e1.getMessage());
+        }
+    }
+
+    private void insertData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertData1ActionPerformed
+        checkAdd(tableExport1, exportInvoice);
+        entity.HoaDonXuat hoaDonXuat = this.getInputHoaDonXuat();
+        insertHoaDonXuatToDB(hoaDonXuat);
+
+        loadDataToTable(tableExport1);
+        resetInputImport();
+    }//GEN-LAST:event_insertData1ActionPerformed
+
+    private void clearData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearData1ActionPerformed
+        int row = tableExport1.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Delete", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int select = JOptionPane.showOptionDialog(null, "Bạn có muốn xóa?", "Delete", 0, JOptionPane.YES_NO_OPTION, null, null, 1);
+        if (select == 0) {
+            PreparedStatement pst = null;
+            String sqlCommand = "delete from hoadonxuat where MaHDX = ?";
+            try {
+                Connection connection = ConnectionDB.getConnect();
+                pst = connection.prepareStatement(sqlCommand);
+                pst.setString(1, (String) tableExport1.getValueAt(row, 0));
+
+                if (pst.executeUpdate() > 0) {
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Xoá thất bại !");
+                }
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                JOptionPane.showMessageDialog(null, "Xoá thất bại ! (Có thể do dữ liệu này còn ở bảng khác) ! Xin kiểm tra lại ");
+            }
+
+            loadDataToTable(tableExport1);
+        }
+        resetInputImport();
+    }//GEN-LAST:event_clearData1ActionPerformed
+
+    private void employeeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeComboActionPerformed
+        Connection connection = ConnectionDB.getConnect();
+        String sql = " SELECT hoTen FROM quanlybangiay.nhanvien where MaNV ='" + employeeCombo.getSelectedItem().toString() + "';";
+
+        try {
+            PreparedStatement pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                employeeName.setText(rs.getString("hoTen"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_employeeComboActionPerformed
+
+    private void quantityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quantityActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_quantityActionPerformed
+
+    private void exportInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportInvoiceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_exportInvoiceActionPerformed
+
+    /**
+     * load dữ liệu từ database tới các bảng Import
+     *
+     * @param table (tableImport1 || tableImport2)
+     */
+    public void loadDataToTable(JTable table) {
+        if (table.equals(tableExport1)) {
+            DefaultTableModel tableModel = (DefaultTableModel) tableExport1.getModel();
+            tableModel.setNumRows(0);
+            String sql1 = "SELECT * FROM quanlybangiay.hoadonxuat";
+            PreparedStatement pst;
+            Connection connection = ConnectionDB.getConnect();
+            int row = 0;
+            try {
+                pst = connection.prepareStatement(sql1);
+                ResultSet rs = pst.executeQuery();
+                while (rs.next()) {
+                    tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                        rs.getString(3), rs.getString(4), rs.getString(5)
+                    });
+                    inserted[row] = true;
+                    row++;
+                }
+                tableExport1.setModel(tableModel);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+            }
+        }
+        if (table.equals(tableExport2)) {
+            DefaultTableModel tableModel = (DefaultTableModel) tableExport2.getModel();
+            tableModel.setNumRows(0);
+            String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat";
+            PreparedStatement pst;
+            Connection connection = ConnectionDB.getConnect();
+            int row = 0;
+            try {
+                pst = connection.prepareStatement(sql);
+                ResultSet rs = pst.executeQuery();
+                while (rs.next()) {
+                    tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                        rs.getString(3), rs.getString(4)
+                    });
+                    inserted[row] = true;
+                    row++;
+                }
+                tableExport2.setModel(tableModel);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+            }
+        }
+    }
+
+    /**
+     * reset toàn bộ dữ liệu đầu vào chức năng Import
+     */
+    public void resetInputImport() {
+        exportInvoice.setText("");
+        customerCombo.setSelectedItem("Chọn mã nhà cung cấp");
+        customerName.setText("");
+        employeeCombo.setSelectedItem("Chọn mã nhân viên");
+        employeeName.setText("");
+        createDay.setText("");
+        exportDay.setText("");
+
+        lbExportInvoice.setText("");
+        productCombo.setSelectedItem("Chọn mã sản phẩm");
+        productName.setText("");
+        quantity.setText("");
+        cost.setText("");
+    }
+    private void viewData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewData1ActionPerformed
+        /**
+         * kích hoạt các nút button
+         */
+        exportFile.setEnabled(true);
+        insertData1.setEnabled(true);
+        editData1.setEnabled(true);
+        clearData1.setEnabled(true);
+
+        insertData2.setEnabled(true);
+        editData2.setEnabled(true);
+        clearData2.setEnabled(true);
+        /**
+         * set lại cho bảng tableImport2 không thể đụng vào
+         */
+        //tableImport2.setEnabled(false);
+
+        /**
+         * Load dữ liệu ra cho bảng hoadonxuat
+         */
+        loadDataToTable(tableExport1);
+
+        /**
+         * load dữ liệu ra cho bảng hoadonchitietxuat
+         */
+        loadDataToTable(tableExport2);
+
+        /**
+         * reset lại toàn bộ các đầu vào
+         */
+        resetInputImport();
+
+    }//GEN-LAST:event_viewData1ActionPerformed
+
+    private void insertData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertData2ActionPerformed
+        if (lbExportInvoice.getText().equals("") || productCombo.getSelectedItem().equals("Chọn mã sản phẩm") || quantity.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "Không thể thêm ! Xem lại !");
+            return;
+        }
+        checkAddHoaDonChiTietXuat();
+        entity.HoaDonChiTietXuat hoaDonChiTietXuat = this.getInputHoaDonChiTietXuat();
+        insertHoaDonChiTietXuatToDB(hoaDonChiTietXuat);
+
+        /**
+         * load ra dữ liệu của bảng hoadonchitietxuat nhưng chỉ xuất theo khoá
+         * đang xét
+         */
+        DefaultTableModel tableModel = (DefaultTableModel) tableExport2.getModel();
+        tableModel.setNumRows(0);
+        String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat where maHDX ='" + lbExportInvoice.getText().toString() + "';";
+        PreparedStatement pst;
+        Connection connection = ConnectionDB.getConnect();
+
+        int row = 0;
+        try {
+            pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                    rs.getString(3), rs.getString(4)
+                });
+                inserted[row] = true;
+                row++;
+            }
+            tableExport2.setModel(tableModel);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+        }
+
+        productName.setText("");
+        quantity.setText("");
+        cost.setText("");
+
+    }//GEN-LAST:event_insertData2ActionPerformed
+
+    /**
+     * Cập nhật hoá đơn nhập
+     *
+     * @param hoaDonXuat
+     * @return true nếu update thành công
+     */
+    public boolean updateHoaDonXuat(entity.HoaDonXuat hoaDonXuat) {
+        String sqlCommand = "update hoadonxuat"
+                + " set MaHDX = ?, "
+                + "MaKH = ?, "
+                + "MaNV = ?, "
+                + "ngayLap = ?, "
+                + "ngayXuatHang = ? "
+                + "where MaHDX = ?";
+        PreparedStatement pst = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            pst = connection.prepareStatement(sqlCommand);
+            pst.setString(1, hoaDonXuat.getMaHDX());
+            pst.setString(2, hoaDonXuat.getMaKH());
+            pst.setString(3, hoaDonXuat.getMaNV());
+            pst.setString(4, hoaDonXuat.getNgayLap());
+            pst.setString(5, hoaDonXuat.getNgayXuatHang());
+            pst.setString(6, lbExportInvoice.getText().toString());
+
+            if (pst.executeUpdate() > 0) {
+                int row = tableExport1.getSelectedRow();
+                if (tableExport1.getValueAt(row, 4).toString().equals("0000-00-00") && !exportDay.getText().equals("")) {
+                    for (int i = 0; i < tableExport2.getRowCount(); i++) {
+                        String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `soLuongCon` = `soLuongCon` - "
+                                + tableExport2.getValueAt(i, 2) + " WHERE (`maSP` = '" + tableExport2.getValueAt(i, 1) + "');";
+                        PreparedStatement ps = connection.prepareStatement(sqlUpdate);
+                        ps.executeUpdate();
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e3) {
+            // TODO Auto-generated catch block
+            System.out.println("update lỗi nhé ! " + e3.getMessage());
+        }
+        return false;
+    }
+
+    public boolean updateHoaDonChiTietXuat(entity.HoaDonChiTietXuat hoaDonChiTietXuat) {
+        String sqlCommand = "update hoadonchitietxuat "
+                + "set MaHDX = ?, "
+                + "MaSP = ?, "
+                + "soLuong = ?, "
+                + "thanhTien = ? "
+                + "where (MaHDX = ?) AND (MaSP = ?);";
+
+        PreparedStatement pst = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            pst = connection.prepareStatement(sqlCommand);
+            pst.setString(1, hoaDonChiTietXuat.getMaHDX());
+            pst.setString(2, hoaDonChiTietXuat.getMaSP());
+            pst.setInt(3, hoaDonChiTietXuat.getSoLuong());
+            pst.setInt(4, hoaDonChiTietXuat.getThanhTien());
+
+            pst.setString(5, lbExportInvoice.getText());
+            pst.setString(6, productCombo.getSelectedItem().toString());
+
+            if (pst.executeUpdate() > 0) {
+                if (!tableExport1.getValueAt(tableExport1.getSelectedRow(), 4).toString().equals("")) {
+                    int s1 = Integer.parseInt(tableExport2.getValueAt(tableExport2.getSelectedRow(), 2).toString());
+                    int s2 = Integer.parseInt(quantity.getText().toString());
+                    String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `soLuongCon` = `soLuongCon` + "
+                            + (s1 - s2)
+                            + "  WHERE (`maSP` = '" + productCombo.getSelectedItem().toString() + "');";
+                    PreparedStatement ps = connection.prepareStatement(sqlUpdate);
+                    ps.executeUpdate();
+                }
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e3) {
+            // TODO Auto-generated catch block
+            System.out.println("update lỗi nhé ! " + e3.toString());
+        }
+        return false;
+    }
+    private void editData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editData1ActionPerformed
+        int row = tableExport1.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        entity.HoaDonXuat hoaDonXuat = getInputHoaDonXuat();
+        if (updateHoaDonXuat(hoaDonXuat)) {
+            JOptionPane.showMessageDialog(null, "Update thành công");
+        } else {
+            JOptionPane.showMessageDialog(null, "Update thất bại");
+        }
+
+        loadDataToTable(tableExport1);
+        resetInputImport();
+    }//GEN-LAST:event_editData1ActionPerformed
+
+    private void employeeComboMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_employeeComboMouseClicked
+
+
+    }//GEN-LAST:event_employeeComboMouseClicked
+
+    private void customerComboMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_customerComboMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_customerComboMouseEntered
+
+    private void customerComboMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_customerComboMouseClicked
+
+    }//GEN-LAST:event_customerComboMouseClicked
+
+    private void productComboMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_productComboMouseClicked
+
+    }//GEN-LAST:event_productComboMouseClicked
+
+    private void tableExport1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableExport1MouseClicked
+
+        //tableImport2.setEnabled(true);
+        int row = tableExport1.getSelectedRow();
+        exportInvoice.setText((String) tableExport1.getValueAt(row, 0));
+        createDay.setText((String) tableExport1.getValueAt(row, 3));
+        employeeCombo.setSelectedItem((String) tableExport1.getValueAt(row, 2));
+        customerCombo.setSelectedItem((String) tableExport1.getValueAt(row, 1));
+        exportDay.setText((String) tableExport1.getValueAt(row, 4));
+        lbExportInvoice.setText((String) tableExport1.getValueAt(row, 0));
+
+        DefaultTableModel tableModel = (DefaultTableModel) tableExport2.getModel();
+        tableModel.setNumRows(0);
+        String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat where maHDX ='" + lbExportInvoice.getText().toString() + "';";
+        PreparedStatement pst;
+        Connection connection = ConnectionDB.getConnect();
+
+        row = 0;
+        try {
+            pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                    rs.getString(3), rs.getString(4)
+                });
+                inserted[row] = true;
+                row++;
+            }
+            tableExport2.setModel(tableModel);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+        }
+
+        productName.setText("");
+        quantity.setText("");
+        cost.setText("");
+    }//GEN-LAST:event_tableExport1MouseClicked
+
+    private void tableExport2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableExport2MouseClicked
+
+        int row2 = tableExport2.getSelectedRow();
+        if (lbExportInvoice.getText().equals("")) {
+            lbExportInvoice.setText((String) tableExport2.getValueAt(row2, 0));
+        }
+
+        productCombo.setSelectedItem((String) tableExport2.getValueAt(row2, 1));
+        quantity.setText((String) tableExport2.getValueAt(row2, 2));
+        cost.setText((String) tableExport2.getValueAt(row2, 3));
+    }//GEN-LAST:event_tableExport2MouseClicked
+
+    private void customerComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_customerComboActionPerformed
+        Connection connection = ConnectionDB.getConnect();
+        String sql = " SELECT hoTen FROM quanlybangiay.khachhang where maKH ='" + customerCombo.getSelectedItem().toString() + "';";
+
+        try {
+            PreparedStatement pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                customerName.setText(rs.getString("hoTen"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_customerComboActionPerformed
+
+    private void clearData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearData2ActionPerformed
+        /**
+         * Xoá dữ liệu trong bảng hoadonchitietxuat
+         */
+        int row = tableExport2.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Delete", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int select = JOptionPane.showOptionDialog(null, "Bạn có muốn xóa?", "Delete", 0, JOptionPane.YES_NO_OPTION, null, null, 1);
+        if (select == 0) {
+            PreparedStatement pst = null;
+            String sqlCommand = "delete from hoadonchitietxuat where MaHDX = ?&& maSP = ?";
+            try {
+                Connection connection = ConnectionDB.getConnect();
+                pst = connection.prepareStatement(sqlCommand);
+
+                pst.setString(1, (String) tableExport2.getValueAt(row, 0));
+                pst.setString(2, (String) tableExport2.getValueAt(row, 1));
+
+                if (pst.executeUpdate() > 0) {
+
+                } else {
+                    JOptionPane.showConfirmDialog(null, "Xoá thất bại! Xin kiểm tra lại!");
+                }
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                JOptionPane.showConfirmDialog(null, "Xoá thất bại! Xin kiểm tra lại!");
+            }
+
+        }
+        /**
+         * load ra dữ liệu của bảng hoadonchitietxuat nhưng chỉ xuất theo khoá
+         * đang xét
+         */
+        DefaultTableModel tableModel = (DefaultTableModel) tableExport2.getModel();
+        tableModel.setNumRows(0);
+        String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat where maHDX ='" + lbExportInvoice.getText().toString() + "';";
+
+        PreparedStatement pst;
+        Connection connection = ConnectionDB.getConnect();
+
+        row = 0;
+        try {
+            pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                    rs.getString(3), rs.getString(4)
+                });
+                inserted[row] = true;
+                row++;
+            }
+            tableExport2.setModel(tableModel);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+        }
+    }//GEN-LAST:event_clearData2ActionPerformed
+
+    private void editData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editData2ActionPerformed
+        int row = tableExport2.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        entity.HoaDonChiTietXuat hoaDonChiTietXuat = getInputHoaDonChiTietXuat();
+        if (updateHoaDonChiTietXuat(hoaDonChiTietXuat)) {
+            JOptionPane.showMessageDialog(null, "Update thành công");
+        } else {
+            JOptionPane.showMessageDialog(null, "Update thất bại");
+        }
+
+        DefaultTableModel tableModel = (DefaultTableModel) tableExport2.getModel();
+        tableModel.setNumRows(0);
+        String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat where maHDX ='" + lbExportInvoice.getText().toString() + "';";
+
+        PreparedStatement pst;
+        Connection connection = ConnectionDB.getConnect();
+
+        row = 0;
+        try {
+            pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
+                    rs.getString(3), rs.getString(4)
+                });
+                inserted[row] = true;
+                row++;
+            }
+            tableExport2.setModel(tableModel);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
+        }
+
+        productCombo.setSelectedItem("Chọn mã sản phẩm");
+        productName.setText("");
+        quantity.setText("");
+        cost.setText("");
+    }//GEN-LAST:event_editData2ActionPerformed
+
+    private void searchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBoxActionPerformed
+
+    }//GEN-LAST:event_searchBoxActionPerformed
+
+    private void propertiesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_propertiesActionPerformed
+        exportFile.setEnabled(true);
+        if (searchBox.getText().equals("")) {
+            return;
+        }
+        JComboBox<String> combo = (JComboBox<String>) evt.getSource();
+        String selected = (String) combo.getSelectedItem();
+        ConnectionDB connectionDB = new ConnectionDB();
+        Connection con = connectionDB.getConnect();
+        if (selected != null) {
+            switch (selected) {
+                case "Mã hoá đơn xuất": {
+                    try {
+                        ((DefaultTableModel) tableExport1.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonxuat WHERE maHDX like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 5; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableExport1.getModel()).addRow(vector);
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        ((DefaultTableModel) tableExport2.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat WHERE maHDX like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 4; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableExport2.getModel()).addRow(vector);
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+
+                case "Mã khách hàng": {
+                    String[] maHDX = new String[100];
+                    int count = 0;
+                    try {
+                        ((DefaultTableModel) tableExport1.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonxuat WHERE maKH like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            maHDX[count] = rs.getString("maHDX");
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 5; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableExport1.getModel()).addRow(vector);
+
+                            count++;
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        DefaultTableModel table = ((DefaultTableModel) tableExport2.getModel());
+                        table.setNumRows(0);
+                        for (int k = 0; k < count; k++) {
+
+                            String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat WHERE maHDX like '%" + maHDX[k] + "%'";
+                            Statement st = con.createStatement();
+                            ResultSet rs = st.executeQuery(sql);
+                            while (rs.next()) {
+                                Vector<String> vector = new Vector<>();
+                                for (int i = 0; i < 4; i++) {
+                                    vector.add(rs.getString(i + 1));
+                                }
+                                table.addRow(vector);
+                            }
+
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+
+                case "Mã nhân viên": {
+                    String[] maHDX = new String[100];
+                    int count = 0;
+                    try {
+                        ((DefaultTableModel) tableExport1.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonxuat WHERE maNV like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            maHDX[count] = rs.getString("maHDX");
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 5; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableExport1.getModel()).addRow(vector);
+
+                            count++;
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        DefaultTableModel table = ((DefaultTableModel) tableExport2.getModel());
+                        table.setNumRows(0);
+                        for (int k = 0; k < count; k++) {
+
+                            String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat WHERE maHDX like '%" + maHDX[k] + "%'";
+                            Statement st = con.createStatement();
+                            ResultSet rs = st.executeQuery(sql);
+                            while (rs.next()) {
+                                Vector<String> vector = new Vector<>();
+                                for (int i = 0; i < 4; i++) {
+                                    vector.add(rs.getString(i + 1));
+                                }
+                                table.addRow(vector);
+                            }
+
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+
+                case "Mã sản phẩm": {
+                    String[] maHDX = new String[100];
+                    int count = 0;
+                    try {
+                        ((DefaultTableModel) tableExport2.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat WHERE maSP like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            maHDX[count] = rs.getString("maHDX");
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 4; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableExport2.getModel()).addRow(vector);
+
+                            count++;
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        DefaultTableModel table = ((DefaultTableModel) tableExport1.getModel());
+                        table.setNumRows(0);
+                        for (int k = 0; k < count; k++) {
+
+                            String sql = "SELECT * FROM quanlybangiay.hoadonxuat WHERE maHDX like '%" + maHDX[k] + "%'";
+                            Statement st = con.createStatement();
+                            ResultSet rs = st.executeQuery(sql);
+                            while (rs.next()) {
+                                Vector<String> vector = new Vector<>();
+                                for (int i = 0; i < 5; i++) {
+                                    vector.add(rs.getString(i + 1));
+                                }
+                                table.addRow(vector);
+                            }
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+
+                case "Ngày nhập hàng": {
+                    String[] maHDX = new String[100];
+                    int count = 0;
+                    try {
+                        ((DefaultTableModel) tableExport1.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonxuat WHERE ngayXuatHang like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            maHDX[count] = rs.getString("maHDX");
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 5; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableExport1.getModel()).addRow(vector);
+
+                            count++;
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        DefaultTableModel table = ((DefaultTableModel) tableExport2.getModel());
+                        table.setNumRows(0);
+                        for (int k = 0; k < count; k++) {
+
+                            String sql = "SELECT * FROM quanlybangiay.hoadonchitietxuat WHERE maHDX like '%" + maHDX[k] + "%'";
+                            Statement st = con.createStatement();
+                            ResultSet rs = st.executeQuery(sql);
+                            while (rs.next()) {
+                                Vector<String> vector = new Vector<>();
+                                for (int i = 0; i < 4; i++) {
+                                    vector.add(rs.getString(i + 1));
+                                }
+                                table.addRow(vector);
+                            }
+
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+            }
+        }
+    }//GEN-LAST:event_propertiesActionPerformed
+
+    private void searchBoxMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_searchBoxMouseEntered
+
+    }//GEN-LAST:event_searchBoxMouseEntered
+
+    /**
+     * đưa các dữ liệu từ các bảng đơn tới comboBox
+     */
+    public void getListToCombo() {
+        ConnectionDB conn = new ConnectionDB();
+        Connection c = conn.getConnect();
+        String sql1 = " SELECT MaNV FROM quanlybangiay.nhanvien;";
+        String sql2 = " SELECT MaKH FROM quanlybangiay.khachhang;";
+        String sql3 = " SELECT MaSP FROM quanlybangiay.sanpham;";
+        try {
+            PreparedStatement pst1 = c.prepareStatement(sql1);
+            PreparedStatement pst2 = c.prepareStatement(sql2);
+            PreparedStatement pst3 = c.prepareStatement(sql3);
+            ResultSet rs1 = pst1.executeQuery();
+            while (rs1.next()) {
+                employeeCombo.addItem(rs1.getString("MaNV"));
+            }
+
+            ResultSet rs2 = pst2.executeQuery();
+            while (rs2.next()) {
+                customerCombo.addItem(rs2.getString("MaKH"));
+            }
+
+            ResultSet rs3 = pst3.executeQuery();
+            while (rs3.next()) {
+                productCombo.addItem(rs3.getString("MaSP"));
+            }
+        } catch (Exception e) {
+        }
+    }
+
     private boolean isEmptyRow(int row) {
         DefaultTableModel tableModel = (DefaultTableModel) tableExport1.getModel();
         for (int i = 0; i < tableExport1.getColumnCount(); i++) {
@@ -514,180 +1952,24 @@ public class Export extends javax.swing.JPanel {
             table.removeRow(1);
         }
     }
-    private void exportFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFileActionPerformed
-        // TODO add your handling code here:
-        try {
-            // mở file word, trong đó file word trích đường dẫn như ví dụ bên dưới
-            FileInputStream fis = new FileInputStream("C:\\Users\\Pham Ngoc Minh\\Desktop\\TestWord.docx");
-            XWPFDocument xdoc = new XWPFDocument(OPCPackage.open(fis));
-            // con trỏ duyệt phần thân của file word
-            Iterator bodyElementIterator = xdoc.getBodyElementsIterator();
-            // duyệt phần body
-            while (bodyElementIterator.hasNext()) {
-                IBodyElement element = (IBodyElement) bodyElementIterator.next();
-                // lấy tất cả các bảng trong phần body
-                if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
-                    java.util.List<XWPFTable> tableList = element.getBody().getTables();
-                    // giờ xử lý với từng bảng, vì trong biểu mẫu chỉ có một bảng nên nó sẽ chỉ xử lý 1 lần
-                    for (XWPFTable table : tableList) {
-                        setDefaultTable(table);
-                        for (int i = 1; i < table.getRows().size(); i++) {
-                            for (int j = 0; j < table.getRow(i).getTableCells().size(); j++) {
-                                removeParagraphs(table.getRow(i).getCell(j));
-                                XWPFParagraph paragraph = table.getRow(i).getCell(j).addParagraph();
-                                paragraph.createRun().setText(tableExport1.getValueAt(i - 1, j).toString());
-                            }
-
-                        }
-                        addRowData(table, table.getRows().size());
-                    }
-                }
-            }
-            OutputStream out = new FileOutputStream("C:\\Users\\Pham Ngoc Minh\\Desktop\\TestWord.docx");
-            xdoc.write(out);
-            out.close();
-
-        } catch (IOException | InvalidFormatException ex) {
-        }
-        int dialogResult = JOptionPane.showConfirmDialog(null, "File đã tạo thành công!\nBạn có muốn mở file?");
-        if (dialogResult == JOptionPane.YES_OPTION) {
-            if (Desktop.isDesktopSupported()) {
-                try {
-                    File myFile = new File("C:\\Users\\Pham Ngoc Minh\\Desktop\\TestWord.docx");
-                    Desktop.getDesktop().open(myFile);
-                } catch (IOException ex) {
-                    // no application registered for PDFs
-                }
-            }
-        } else {
-        }
-
-    }//GEN-LAST:event_exportFileActionPerformed
-
-    private void viewDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewDataActionPerformed
-        // TODO add your handling code here:
-
-        ConnectionDB connectDB = new ConnectionDB();
-        Connection connection = connectDB.getConnect();
-        DefaultTableModel tableModel = (DefaultTableModel) tableExport1.getModel();
-        tableModel.setNumRows(0);
-        String sql = "SELECT * FROM quanlybangiay.nhanvien";
-        PreparedStatement pst;
-        int row = 0;
-        try {
-            pst = connection.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();
-            while (rs.next()) {
-                tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
-                    rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9)
-                });
-                inserted[row] = true;
-                row++;
-            }
-            tableExport1.setModel(tableModel);
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
-        }
-    }//GEN-LAST:event_viewDataActionPerformed
-
-    private void insertDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertDataActionPerformed
-        // TODO add your handling code here:
-        ConnectionDB connectDB = new ConnectionDB();
-        Connection connection = connectDB.getConnect();
-
-        //        DefaultTableModel tableModel = (DefaultTableModel) tableExport1.getModel();
-        int rows = tableExport1.getRowCount();
-        for (int row = 0; row < rows; row++) {
-            if (!inserted[row] && !isEmptyRow(row)) {
-                String sql = "INSERT INTO quanlybangiay.nhanvien VALUES (?,?,?,?,?,?,?,?,?)";
-                try {
-                    connection.setAutoCommit(false);
-                    PreparedStatement pst = connection.prepareStatement(sql);
-                    pst.setString(1, tableExport1.getValueAt(row, 0).toString());
-                    pst.setString(2, tableExport1.getValueAt(row, 1).toString());
-                    pst.setString(3, tableExport1.getValueAt(row, 2).toString());
-                    pst.setString(4, tableExport1.getValueAt(row, 3).toString());
-                    pst.setString(5, tableExport1.getValueAt(row, 4).toString());
-                    pst.setString(6, tableExport1.getValueAt(row, 5).toString());
-                    pst.setString(7, tableExport1.getValueAt(row, 6).toString());
-                    pst.setString(8, tableExport1.getValueAt(row, 7).toString());
-                    pst.setString(9, tableExport1.getValueAt(row, 8).toString());
-
-                    pst.addBatch();
-                    pst.executeUpdate();
-                    connection.commit();
-
-                } catch (HeadlessException | SQLException ex) {
-                    JOptionPane.showMessageDialog(null, ex.getMessage());
-                }
-                inserted[row] = true;
-            }
-        }
-        JOptionPane.showMessageDialog(null, "Successfully");
-    }//GEN-LAST:event_insertDataActionPerformed
-
-    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        // TODO add your handling code here:
-        new ChartFrame().setVisible(true);
-    }//GEN-LAST:event_jButton7ActionPerformed
-
-    private void productComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productComboActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_productComboActionPerformed
-
-    private void clearDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearDataActionPerformed
-        // TODO add your handling code here:
-        int dialog = JOptionPane.showConfirmDialog(null, "Hành động này sẽ xoá toàn bộ dữ liệu \nBạn có muốn tiếp tục không?\nTip: Nếu bạn không chắc chắn, hãy kiểm tra lại hoặc xoá lần lượt từng hàng một!", "Cảnh báo", JOptionPane.INFORMATION_MESSAGE);
-
-        if(dialog == JOptionPane.YES_OPTION) {
-            ConnectionDB connectionDB = new ConnectionDB();
-            Connection con = connectionDB.getConnect();
-
-            String sql = "deletle from quanlybangiay.nhavien";
-            try {
-                con.setAutoCommit(false);
-                PreparedStatement pst = con.prepareStatement(sql);
-                pst.execute();
-                con.commit();
-                JOptionPane.showMessageDialog(null, "Thành công!");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Không thể xoá dữ liệu\n" + "Lỗi: " + e.getMessage());
-            }
-        }
-    }//GEN-LAST:event_clearDataActionPerformed
-
-    private void costActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_costActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_costActionPerformed
-
-    private void viewData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewData1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_viewData1ActionPerformed
-
-    private void insertData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertData1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_insertData1ActionPerformed
-
-    private void clearData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearData1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_clearData1ActionPerformed
-
+    public boolean[] inserted = new boolean[100000];
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton clearData;
     private javax.swing.JButton clearData1;
-    private javax.swing.JTextField cost;
+    private javax.swing.JButton clearData2;
+    private javax.swing.JLabel cost;
     private javax.swing.JTextField createDay;
-    private javax.swing.JComboBox<String> customerID;
+    private javax.swing.JComboBox<String> customerCombo;
     private javax.swing.JLabel customerName;
+    private javax.swing.JButton editData1;
+    private javax.swing.JButton editData2;
     private javax.swing.JComboBox<String> employeeCombo;
     private javax.swing.JLabel employeeName;
     private javax.swing.JTextField exportDay;
     private javax.swing.JButton exportFile;
     private javax.swing.JTextField exportInvoice;
-    private javax.swing.JButton insertData;
     private javax.swing.JButton insertData1;
-    private javax.swing.JButton jButton7;
+    private javax.swing.JButton insertData2;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel18;
@@ -702,19 +1984,23 @@ public class Export extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel86;
     private javax.swing.JLabel jLabel87;
     private javax.swing.JLabel jLabel89;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JToolBar jToolBar2;
     private javax.swing.JToolBar jToolBar4;
     private javax.swing.JToolBar jToolBar5;
     private javax.swing.JToolBar jToolBar6;
     private javax.swing.JLabel lbExportInvoice;
     private javax.swing.JComboBox<String> productCombo;
     private javax.swing.JLabel productName;
+    private javax.swing.JComboBox<String> properties;
     private javax.swing.JTextField quantity;
+    private javax.swing.JTextField searchBox;
     public javax.swing.JTable tableExport1;
     public javax.swing.JTable tableExport2;
-    private javax.swing.JButton viewData;
     private javax.swing.JButton viewData1;
     // End of variables declaration//GEN-END:variables
 }

@@ -67,7 +67,4 @@ public class HoaDonNhap {
     public void setNgayNhanHang(String ngayNhanHang) {
         this.ngayNhanHang = ngayNhanHang;
     }
-    
-    
-    
 }

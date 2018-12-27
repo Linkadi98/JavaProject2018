@@ -15,19 +15,25 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -45,8 +51,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
+import org.apache.poi.xwpf.usermodel.TableRowAlign;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -64,7 +72,7 @@ public class Import extends javax.swing.JPanel {
     public Import() {
         initComponents();
         getListToCombo();
-        tableImport2.setEnabled(false); //chưa load bảng 1 thì bảng 2 ko được phép can thiệp
+        //tableImport2.setEnabled(false); //chưa load bảng 1 thì bảng 2 ko được phép can thiệp
 
         /**
          * ngăn quyền truy cập tới các button khi chưa load CSDL
@@ -77,7 +85,6 @@ public class Import extends javax.swing.JPanel {
         insertData2.setEnabled(false);
         editData2.setEnabled(false);
         clearData2.setEnabled(false);
-        jButton7.setEnabled(false);
     }
 
     /**
@@ -108,7 +115,6 @@ public class Import extends javax.swing.JPanel {
         productCombo = new javax.swing.JComboBox<>();
         productName = new javax.swing.JLabel();
         quantity = new javax.swing.JTextField();
-        cost = new javax.swing.JTextField();
         jScrollPane6 = new javax.swing.JScrollPane();
         tableImport1 = new javax.swing.JTable();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -134,7 +140,9 @@ public class Import extends javax.swing.JPanel {
         editData2 = new javax.swing.JButton();
         clearData2 = new javax.swing.JButton();
         jToolBar2 = new javax.swing.JToolBar();
-        jButton7 = new javax.swing.JButton();
+        cost = new javax.swing.JLabel();
+        properties = new javax.swing.JComboBox<>();
+        searchBox = new javax.swing.JTextField();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setPreferredSize(new java.awt.Dimension(1220, 710));
@@ -162,6 +170,7 @@ public class Import extends javax.swing.JPanel {
         jLabel24.setForeground(new java.awt.Color(0, 102, 255));
         jLabel24.setText("Ngày nhập hàng");
 
+        employeeCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Chọn mã nhân viên" }));
         employeeCombo.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 employeeComboMouseClicked(evt);
@@ -182,6 +191,7 @@ public class Import extends javax.swing.JPanel {
             }
         });
 
+        supplierCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Chọn mã nhà cung cấp" }));
         supplierCombo.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 supplierComboMouseClicked(evt);
@@ -218,6 +228,7 @@ public class Import extends javax.swing.JPanel {
         jLabel87.setForeground(new java.awt.Color(0, 102, 255));
         jLabel87.setText("Thành tiền");
 
+        productCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Chọn mã sản phẩm" }));
         productCombo.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 productComboMouseClicked(evt);
@@ -238,8 +249,6 @@ public class Import extends javax.swing.JPanel {
                 quantityActionPerformed(evt);
             }
         });
-
-        cost.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
         tableImport1.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         tableImport1.setModel(new javax.swing.table.DefaultTableModel(
@@ -431,15 +440,27 @@ public class Import extends javax.swing.JPanel {
         jToolBar2.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar2.setRollover(true);
 
-        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Combo_Chart_37px.png"))); // NOI18N
-        jButton7.setToolTipText("Thống kê");
-        jButton7.setOpaque(false);
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
+        cost.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+
+        properties.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        properties.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tìm kiếm theo", "Mã hoá đơn nhập", "Mã nhà cung cấp", "Mã nhân viên", "Mã sản phẩm", "Ngày nhập hàng" }));
+        properties.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton7ActionPerformed(evt);
+                propertiesActionPerformed(evt);
             }
         });
-        jToolBar2.add(jButton7);
+
+        searchBox.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        searchBox.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                searchBoxMouseEntered(evt);
+            }
+        });
+        searchBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchBoxActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -491,27 +512,31 @@ public class Import extends javax.swing.JPanel {
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(inputInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
                                             .addComponent(supplierCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(jLabel28, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(jLabel85, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(jLabel89, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(jLabel86, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(jLabel87, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addGap(34, 34, 34)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(productName, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(productCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(cost, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(quantity, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(lbInputInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabel28, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel85, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel89, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel86, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel87, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lbInputInvoice, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
+                                    .addComponent(productCombo, javax.swing.GroupLayout.Alignment.TRAILING, 0, 75, Short.MAX_VALUE)
+                                    .addComponent(productName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
+                                    .addComponent(quantity, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
+                                    .addComponent(cost, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(6, 6, 6)
                         .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(29, 29, 29)
+                        .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(84, 84, 84)
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(29, 29, 29)
                         .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -535,16 +560,24 @@ public class Import extends javax.swing.JPanel {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jToolBar5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jToolBar4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jToolBar6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(22, 22, 22)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jToolBar5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jToolBar4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jToolBar6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jToolBar1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(22, 22, 22))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -595,10 +628,13 @@ public class Import extends javax.swing.JPanel {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(quantity, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel86, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(cost, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel87, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(15, 15, 15)
+                                .addComponent(jLabel87, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cost))))
                     .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(3, 3, 3))
         );
@@ -640,52 +676,340 @@ public class Import extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_productComboActionPerformed
 
-    private void exportFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFileActionPerformed
-        // TODO add your handling code here:
+    /**
+     * Lấy tên Nhà cung cấp
+     *
+     * @param maNCC
+     * @return
+     */
+    public String getTenNCC(String maNCC) {
+        String tenNCC = null;
+        String sql = "SELECT tenNCC "
+                + "FROM  nhacungcap "
+                + "WHERE maNCC = '" + maNCC + "';";
+        PreparedStatement ps = null;
+        Connection connection = ConnectionDB.getConnect();
         try {
-            // mở file word, trong đó file word trích đường dẫn như ví dụ bên dưới
-            FileInputStream fis = new FileInputStream("C:\\Users\\Pham Ngoc Minh\\Desktop\\TestWord.docx");
-            XWPFDocument xdoc = new XWPFDocument(OPCPackage.open(fis));
-            // con trỏ duyệt phần thân của file word
-            Iterator bodyElementIterator = xdoc.getBodyElementsIterator();
-            // duyệt phần body
-            while (bodyElementIterator.hasNext()) {
-                IBodyElement element = (IBodyElement) bodyElementIterator.next();
-                // lấy tất cả các bảng trong phần body
-                if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
-                    java.util.List<XWPFTable> tableList = element.getBody().getTables();
-                    // giờ xử lý với từng bảng, vì trong biểu mẫu chỉ có một bảng nên nó sẽ chỉ xử lý 1 lần
-                    for (XWPFTable table : tableList) {
-                        setDefaultTable(table);
-                        for (int i = 1; i < table.getRows().size(); i++) {
-                            for (int j = 0; j < table.getRow(i).getTableCells().size(); j++) {
-                                removeParagraphs(table.getRow(i).getCell(j));
-                                XWPFParagraph paragraph = table.getRow(i).getCell(j).addParagraph();
-                                paragraph.createRun().setText(tableImport1.getValueAt(i - 1, j).toString());
+            ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                tenNCC = rs.getString("tenNCC");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+        return tenNCC;
+    }
+
+    /**
+     * Lấy ten nhân viên
+     *
+     * @param maNV
+     * @return
+     */
+    public String getTenNV(String maNV) {
+        String tenNV = null;
+        String sql = "SELECT hoTen "
+                + "FROM  nhanvien "
+                + "WHERE MaNV = '" + maNV + "';";
+        PreparedStatement ps = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                tenNV = rs.getString("hoTen");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+        return tenNV;
+    }
+    
+    /**
+     * Lấy tên sản phẩm từ mã sản phẩm
+     * @param maNCC
+     * @return 
+     */
+    public String getTenSP(String maSP) {
+        String tenSP = null;
+        String sql = "SELECT tenSP "
+                + "FROM  sanpham "
+                + "WHERE maSP = '" + maSP + "';";
+        PreparedStatement ps = null;
+        Connection connection = ConnectionDB.getConnect();
+        try {
+            ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                tenSP = rs.getString("tenSP");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+        return tenSP;
+    }
+
+    /*------------------------------------------- Xuất File --------------------------------------------------*/
+    // Xuất hoá đơn nhập
+    public void xuatPhieu(XWPFDocument doc, String fileName) {
+        try {
+            InputStream file = new FileInputStream(fileName);
+            Iterator bodyElementIterator = doc.getBodyElementsIterator();
+
+            for (XWPFParagraph p : doc.getParagraphs()) {
+                List<XWPFRun> runs = p.getRuns();
+                if (runs != null) {
+                    for (XWPFRun r : runs) {
+                        r.setFontSize(12);
+                        r.setFontFamily("Times New Roman");
+                        String text = r.getText(0);
+                        if (text != null) {
+                            if (text.contains("HDN")) {
+                                text = text.replace("HDN", tableImport1.getValueAt(0, 0).toString() + "      ");                               
+                                r.addBreak();
+                                r.setText(text, 0);
                             }
 
+                            if (text.contains("NCC")) {
+                                text = text.replace("NCC", "                       Mã nhà cung cấp: "
+                                        + tableImport1.getValueAt(0, 1).toString() + "                            "
+                                        + "Tên nhà cung cấp: "
+                                        + getTenNCC(tableImport1.getValueAt(0, 1).toString()));
+                                r.addBreak();
+                                r.setText(text, 0);
+
+                            }
+
+                            if (text.contains("NVx")) {
+                                text = text.replace("NVx", "                       Mã nhân viên: "
+                                        + tableImport1.getValueAt(0, 2).toString() + "                                       "
+                                        + "Tên nhân viên: "
+                                        + getTenNV(tableImport1.getValueAt(0, 2).toString()));
+                                r.addBreak();
+                                r.setText(text, 0);
+
+                            }
+
+                            if (text.contains("yyyyMMDD")) {
+                                text = text.replace("yyyyMMDD", "                       Ngày lập: "
+                                        + tableImport1.getValueAt(0, 3).toString() + "                                   "
+                                        + "Ngày nhận hàng: "
+                                        + tableImport1.getValueAt(0, 4).toString());
+                                System.out.println("" + text);
+                                r.addBreak();
+                                r.setText(text, 0);
+                            }
+                            if (text.contains("tiencpxxx")) {
+                                int tongSoTien = 0;
+
+                                for (int i = 0; i < tableImport2.getRowCount(); i++) {
+                                    tongSoTien += Integer.parseInt(tableImport2.getValueAt(i, 3).toString());
+                                }
+                                text = text.replace("tiencpxxx", "                        Tổng số tiền: " + tongSoTien);
+                                r.addBreak();
+                                r.setText(text, 0);
+                                break;
+                            }
+                            if (text.contains("ngayxxx")) {
+                                SimpleDateFormat day = new SimpleDateFormat("dd");
+                                SimpleDateFormat month = new SimpleDateFormat("MM");
+                                SimpleDateFormat year = new SimpleDateFormat("yyyy");
+                                Date date = new Date();
+                                String ngay = day.format(date);
+                                String thang = month.format(date);
+                                String nam = year.format(date);
+                                text = text.replace("ngayxxx", "Ngày  " + ngay + "  Tháng  " + thang + "  Năm  " + nam);
+                                r.setText(text, 0);
+                                break;
+                            }
                         }
-                        addRowData(table, table.getRows().size());
                     }
                 }
             }
-            OutputStream out = new FileOutputStream("C:\\Users\\Pham Ngoc Minh\\Desktop\\TestWord.docx");
-            xdoc.write(out);
-            out.close();
 
-        } catch (IOException | InvalidFormatException ex) {
+            while (bodyElementIterator.hasNext()) {
+                IBodyElement element = (IBodyElement) bodyElementIterator.next();
+                if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
+                    //Danh sách tất cả Table trong file word
+                    List<XWPFTable> tableList = element.getBody().getTables();
+                    for (XWPFTable table : tableList) {
+                        //Căn bảng ở giữa file
+                        table.setTableAlignment(TableRowAlign.CENTER);
+
+                        //  Xóa các dòng thừa trước khi thêm mới
+                        while (table.getRow(1) != null) {
+                            table.removeRow(1);
+                        }
+                        //Thêm các dòng từ jTable vào table trong word
+                        for (int i = 1; i <= tableImport2.getRowCount(); i++) {
+
+                            XWPFTableRow newRow = table.createRow();
+                            newRow.getCell(0).setText(i + "");
+                            newRow.getCell(1).setText(tableImport2.getValueAt(i - 1, 0).toString());
+                            newRow.getCell(2).setText(tableImport2.getValueAt(i - 1, 1).toString());
+                            newRow.getCell(3).setText(getTenSP(tableImport2.getValueAt(i - 1, 1).toString()));
+                            newRow.getCell(4).setText(tableImport2.getValueAt(i - 1, 2).toString());
+                            newRow.getCell(5).setText(tableImport2.getValueAt(i - 1, 3).toString());
+
+                        }
+                    }
+                }
+            }
+
+            OutputStream fOut = new FileOutputStream("Hoá đơn nhập.docx");
+            doc.write(fOut);
+            fOut.close();
+        } catch (IOException ex) {
+            JOptionPane.showConfirmDialog(null, ex.getMessage());
+            Logger.getLogger(Import.class.getName()).log(Level.SEVERE, null, ex);
         }
-        int dialogResult = JOptionPane.showConfirmDialog(null, "File đã tạo thành công!\nBạn có muốn mở file?");
-        if (dialogResult == JOptionPane.YES_OPTION) {
-            if (Desktop.isDesktopSupported()) {
+
+        String fileOut = System.getProperty("user.home")
+                + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\"
+                + "Hoá đơn nhập.docx";
+        try {
+            File myFile = new File(fileOut);
+            Desktop.getDesktop().open(myFile);
+        } catch (IOException ex) {
+            JOptionPane.showConfirmDialog(null, ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    private void exportFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFileActionPerformed
+        String fileName = null;
+        String f0 = System.getProperty("user.home");
+        String f1 = "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\Quản Lý Nhập\\";
+        String f2 = null;
+        String sql = null;
+        
+        if(properties.getSelectedItem().toString().equals("Tìm kiếm theo") || searchBox.getText().equals("")){
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn tiêu chuẩn tìm kiếm");
+            return;
+        }
+        
+        if (properties.getSelectedItem().toString().equals("Mã hoá đơn nhập")) {
+            f2 = "Hoá đơn nhập.docx";
+        } else if (properties.getSelectedItem().toString().equals("Mã nhà cung cấp")) {           
+
+            f2 = "Tìm kiếm theo mã nhà cung cấp.docx";
+            sql = "SELECT A.maHDN, maSP, maNCC, maNV, ngayNhanHang, ngayLap, soLuong, thanhTien\n"
+                    + "from hoadonnhap A join hoadonchitietnhap B \n"
+                    + "on A.maHDN = B.maHDN \n"
+                    + "where A.maNCC = \"" + searchBox.getText() + "\";";
+
+        } else if (properties.getSelectedItem().toString().equals("Mã nhân viên")) {
+            //JOptionPane.showMessageDialog(null, "OK");
+
+            f2 = "Tìm kiếm theo mã nhân viên.docx";
+            sql = "SELECT A.maHDN, maSP, maNCC, maNV, ngayNhanHang, ngayLap, soLuong, thanhTien\n"
+                    + "from hoadonnhap A join hoadonchitietnhap B \n"
+                    + "on A.maHDN = B.maHDN \n"
+                    + "where A.maNV = \"" + searchBox.getText() + "\";";
+
+        } else if (properties.getSelectedItem().toString().equals("Mã sản phẩm")) {
+
+            f2 = "Tìm kiếm theo mã sản phẩm.docx";
+            sql = "SELECT A.maHDN, maSP, maNCC, maNV, ngayNhanHang, ngayLap, soLuong, thanhTien\n"
+                    + "from hoadonnhap A join hoadonchitietnhap B \n"
+                    + "on A.maHDN = B.maHDN \n"
+                    + "where B.maSP = \"" + searchBox.getText() + "\";";
+
+        } else if (properties.getSelectedItem().toString().equals("Ngày nhập hàng")) {
+
+            f2 = "Tìm kiếm theo ngày nhập hàng.docx";
+            sql = "SELECT A.maHDN, maSP, maNCC, maNV, ngayNhanHang, ngayLap, soLuong, thanhTien\n"
+                    + "from hoadonnhap A join hoadonchitietnhap B \n"
+                    + "on A.maHDN = B.maHDN \n"
+                    + "where A.ngayNhanHang = \"" + searchBox.getText() + "\";";
+
+        }
+
+        fileName = f0 + f1 + f2;
+
+        try {
+            InputStream file = new FileInputStream(fileName);
+            XWPFDocument docx = new XWPFDocument(OPCPackage.open(file));
+            Iterator bodyElementIterator = docx.getBodyElementsIterator();
+            //Nếu là xuất phiếu mượn thì sửa form
+            if (f2.equals("Hoá đơn nhập.docx")) {
+                xuatPhieu(docx, fileName);
+            } else {
+                for (XWPFParagraph p : docx.getParagraphs()) {
+                    List<XWPFRun> runs = p.getRuns();
+                    if (runs != null) {
+                        for (XWPFRun r : runs) {
+                            r.setFontSize(12);
+                            r.setFontFamily("Times New Roman");
+                            String text = r.getText(0);
+                            if (text != null) {
+                                if (text.contains("ngayxxx")) {
+                                    SimpleDateFormat day = new SimpleDateFormat("dd");
+                                    SimpleDateFormat month = new SimpleDateFormat("MM");
+                                    SimpleDateFormat year = new SimpleDateFormat("yyyy");
+                                    Date date = new Date();
+                                    String ngay = day.format(date);
+                                    String thang = month.format(date);
+                                    String nam = year.format(date);
+                                    text = text.replace("ngayxxx", "Ngày  " + ngay + "  Tháng  " + thang + "  Năm  " + nam);
+                                    r.setText(text, 0);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                while (bodyElementIterator.hasNext()) {
+                    IBodyElement element = (IBodyElement) bodyElementIterator.next();
+                    if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
+                        //Danh sách tất cả Table trong file word
+                        List<XWPFTable> tableList = element.getBody().getTables();
+                        for (XWPFTable table : tableList) {
+                            //Căn bảng ở giữa file
+                            table.setTableAlignment(TableRowAlign.CENTER);
+                            //  Xóa các dòng thừa trước khi thêm mới
+                            while (table.getRow(1) != null) {
+                                table.removeRow(1);
+                            }
+                            int i = 0;
+                            //Thêm các dòng từ jTable vào table trong word
+                            PreparedStatement ps = null;
+                            Connection connection = ConnectionDB.getConnect();
+                            try {
+                                ps = connection.prepareStatement(sql);
+                                ResultSet rs = ps.executeQuery();
+                                while (rs.next()) {
+                                    XWPFTableRow newRow = table.createRow();
+                                    newRow.getCell(0).setText(++i + "");
+                                    for (int j = 1; j < 9; j++) {
+
+                                        newRow.getCell(j).setText(rs.getString(j));
+                                    }
+                                }
+                            } catch (SQLException ex) {
+                                Logger.getLogger(Import.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                        }
+                    }
+                }
+                OutputStream fOut = new FileOutputStream(f2);
+                docx.write(fOut);
+                fOut.close();
+                //Mở file
                 try {
-                    File myFile = new File("C:\\Users\\Pham Ngoc Minh\\Desktop\\TestWord.docx");
+                    File myFile = new File(f0 + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\" + f2);
                     Desktop.getDesktop().open(myFile);
                 } catch (IOException ex) {
                     // no application registered for PDFs
+                    JOptionPane.showConfirmDialog(null, ex.getMessage());
+                    ex.printStackTrace();
                 }
             }
-        } else {
+        } catch (IOException | InvalidFormatException ex) {
+            JOptionPane.showConfirmDialog(null, ex.getMessage());
+            Logger.getLogger(Import.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_exportFileActionPerformed
 
@@ -748,7 +1072,21 @@ public class Import extends javax.swing.JPanel {
         String maHDN = lbInputInvoice.getText();
         String maSP = productCombo.getSelectedItem().toString();
         int soLuong = Integer.parseInt(quantity.getText());
-        int thanhTien = Integer.parseInt(this.cost.getText());
+        Connection connection = ConnectionDB.getConnect();
+        String sql = " SELECT donGiaNhap FROM quanlybangiay.sanpham where maSP ='" + maSP + "';";
+
+        int donGiaNhap = 0;
+        try {
+            PreparedStatement pst = connection.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                donGiaNhap = Integer.parseInt(rs.getString("donGiaNhap"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        int thanhTien = donGiaNhap * soLuong;
 
         entity.HoaDonChiTietNhap hoaDonChiTietNhap = new entity.HoaDonChiTietNhap(maHDN, maSP, soLuong, thanhTien);
         return hoaDonChiTietNhap;
@@ -774,13 +1112,12 @@ public class Import extends javax.swing.JPanel {
             pst.setString(5, hoaDonNhap.getNgayNhanHang());
 
             if (pst.executeUpdate() > 0) {
-                System.out.println("insert Successfully");
+
             } else {
-                System.out.println("insert failed");
+                JOptionPane.showMessageDialog(null, "Thêm thất bại !");
             }
         } catch (SQLException e1) {
-            // TODO Auto-generated catch block
-            System.out.println("select error" + e1.toString());
+            JOptionPane.showMessageDialog(null, "Thêm thất bại ! Xin kiểm tra lại !");
         }
     }
 
@@ -798,13 +1135,13 @@ public class Import extends javax.swing.JPanel {
             pst.setInt(4, hoaDonChiTietNhap.getThanhTien());
 
             if (pst.executeUpdate() > 0) {
-                System.out.println("insert Successfully");
+
             } else {
-                System.out.println("insert failed");
+                JOptionPane.showMessageDialog(null, "Không thể thêm ! Xin kiểm tra lại !");
             }
         } catch (SQLException e1) {
             // TODO Auto-generated catch block
-            System.out.println("select error" + e1.toString());
+            JOptionPane.showMessageDialog(null, "Không thể thêm ! Xin kiểm tra lại !");
         }
     }
 
@@ -816,11 +1153,6 @@ public class Import extends javax.swing.JPanel {
         loadDataToTable(tableImport1);
         resetInputImport();
     }//GEN-LAST:event_insertData1ActionPerformed
-
-    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        // TODO add your handling code here:
-        new ChartFrame().setVisible(true);
-    }//GEN-LAST:event_jButton7ActionPerformed
 
     private void clearData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearData1ActionPerformed
         int row = tableImport1.getSelectedRow();
@@ -838,17 +1170,18 @@ public class Import extends javax.swing.JPanel {
                 pst.setString(1, (String) tableImport1.getValueAt(row, 0));
 
                 if (pst.executeUpdate() > 0) {
-                    System.out.println("Delete Successfully");
+
                 } else {
-                    System.out.println("Delete failed");
+                    JOptionPane.showMessageDialog(null, "Xoá thất bại !");
                 }
             } catch (SQLException e) {
                 // TODO Auto-generated catch block
-                System.out.println("delete error" + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Xoá thất bại ! (Có thể do dữ liệu này còn ở bảng khác) ! Xin kiểm tra lại ");
             }
 
             loadDataToTable(tableImport1);
         }
+        resetInputImport();
     }//GEN-LAST:event_clearData1ActionPerformed
 
     private void employeeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeComboActionPerformed
@@ -932,11 +1265,15 @@ public class Import extends javax.swing.JPanel {
      */
     public void resetInputImport() {
         inputInvoice.setText("");
-        createDay.setText("");
-        employeeName.setText("");
+        supplierCombo.setSelectedItem("Chọn mã nhà cung cấp");
         supplierName.setText("");
+        employeeCombo.setSelectedItem("Chọn mã nhân viên");
+        employeeName.setText("");
+        createDay.setText("");
         receiveDay.setText("");
+
         lbInputInvoice.setText("");
+        productCombo.setSelectedItem("Chọn mã sản phẩm");
         productName.setText("");
         quantity.setText("");
         cost.setText("");
@@ -953,12 +1290,10 @@ public class Import extends javax.swing.JPanel {
         insertData2.setEnabled(true);
         editData2.setEnabled(true);
         clearData2.setEnabled(true);
-        jButton7.setEnabled(true);
-
         /**
          * set lại cho bảng tableImport2 không thể đụng vào
          */
-        tableImport2.setEnabled(false);
+        //tableImport2.setEnabled(false);
 
         /**
          * Load dữ liệu ra cho bảng hoadonnhap
@@ -978,6 +1313,10 @@ public class Import extends javax.swing.JPanel {
     }//GEN-LAST:event_viewData1ActionPerformed
 
     private void insertData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertData2ActionPerformed
+        if (lbInputInvoice.getText().equals("") || productCombo.getSelectedItem().equals("Chọn mã sản phẩm") || quantity.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "Không thể thêm ! Xem lại !");
+            return;
+        }
         checkAddHoaDonChiTietNhap();
         entity.HoaDonChiTietNhap hoaDonChiTietNhap = this.getInputHoaDonChiTietNhap();
         insertHoaDonChiTietNhapToDB(hoaDonChiTietNhap);
@@ -1007,23 +1346,27 @@ public class Import extends javax.swing.JPanel {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
         }
-        resetInputImport();
+
+        productName.setText("");
+        quantity.setText("");
+        cost.setText("");
+
     }//GEN-LAST:event_insertData2ActionPerformed
-    
+
     /**
      * Cập nhật hoá đơn nhập
+     *
      * @param hoaDonNhap
      * @return true nếu update thành công
      */
-    public boolean updateHoaDonNhap(entity.HoaDonNhap hoaDonNhap){
+    public boolean updateHoaDonNhap(entity.HoaDonNhap hoaDonNhap) {
         String sqlCommand = "update hoadonnhap"
                 + " set MaHDN = ?, "
                 + "MaNCC = ?, "
                 + "MaNV = ?, "
                 + "ngayLap = ?, "
                 + "ngayNhanHang = ? "
-                
-                + "where MaHDN = ?";        
+                + "where MaHDN = ?";
 
         PreparedStatement pst = null;
         Connection connection = ConnectionDB.getConnect();
@@ -1047,14 +1390,13 @@ public class Import extends javax.swing.JPanel {
         }
         return false;
     }
-    
-    public boolean updateHoaDonChiTietNhap(entity.HoaDonChiTietNhap hoaDonChiTietNhap){
+
+    public boolean updateHoaDonChiTietNhap(entity.HoaDonChiTietNhap hoaDonChiTietNhap) {
         String sqlCommand = "update hoadonchitietnhap "
                 + "set MaHDN = ?, "
                 + "MaSP = ?, "
                 + "soLuong = ?, "
                 + "thanhTien = ? "
-                
                 + "where (MaHDN = ?) AND (MaSP = ?);";
 
         PreparedStatement pst = null;
@@ -1065,7 +1407,7 @@ public class Import extends javax.swing.JPanel {
             pst.setString(2, hoaDonChiTietNhap.getMaSP());
             pst.setInt(3, hoaDonChiTietNhap.getSoLuong());
             pst.setInt(4, hoaDonChiTietNhap.getThanhTien());
-            
+
             pst.setString(5, lbInputInvoice.getText());
             pst.setString(6, productCombo.getSelectedItem().toString());
 
@@ -1087,13 +1429,14 @@ public class Import extends javax.swing.JPanel {
             return;
         }
         entity.HoaDonNhap hoaDonNhap = getInputHoaDonNhap();
-        if(updateHoaDonNhap(hoaDonNhap)){
+        if (updateHoaDonNhap(hoaDonNhap)) {
             JOptionPane.showMessageDialog(null, "Update thành công");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Update thất bại");
         }
-        
+
         loadDataToTable(tableImport1);
+        resetInputImport();
     }//GEN-LAST:event_editData1ActionPerformed
 
     private void employeeComboMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_employeeComboMouseClicked
@@ -1115,7 +1458,7 @@ public class Import extends javax.swing.JPanel {
 
     private void tableImport1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableImport1MouseClicked
 
-        tableImport2.setEnabled(true);
+        //tableImport2.setEnabled(true);
         int row = tableImport1.getSelectedRow();
         inputInvoice.setText((String) tableImport1.getValueAt(row, 0));
         createDay.setText((String) tableImport1.getValueAt(row, 3));
@@ -1145,9 +1488,14 @@ public class Import extends javax.swing.JPanel {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
         }
+
+        productName.setText("");
+        quantity.setText("");
+        cost.setText("");
     }//GEN-LAST:event_tableImport1MouseClicked
 
     private void tableImport2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableImport2MouseClicked
+
         int row2 = tableImport2.getSelectedRow();
         if (lbInputInvoice.getText().equals("")) {
             lbInputInvoice.setText((String) tableImport2.getValueAt(row2, 0));
@@ -1195,13 +1543,13 @@ public class Import extends javax.swing.JPanel {
                 pst.setString(2, (String) tableImport2.getValueAt(row, 1));
 
                 if (pst.executeUpdate() > 0) {
-                    System.out.println("Delete Successfully");
+
                 } else {
-                    System.out.println("Delete failed");
+                    JOptionPane.showConfirmDialog(null, "Xoá thất bại! Xin kiểm tra lại!");
                 }
             } catch (SQLException e) {
                 // TODO Auto-generated catch block
-                System.out.println("delete error" + e.getMessage());
+                JOptionPane.showConfirmDialog(null, "Xoá thất bại! Xin kiểm tra lại!");
             }
 
         }
@@ -1212,7 +1560,7 @@ public class Import extends javax.swing.JPanel {
         DefaultTableModel tableModel = (DefaultTableModel) tableImport2.getModel();
         tableModel.setNumRows(0);
         String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap where maHDN ='" + lbInputInvoice.getText().toString() + "';";
-        
+
         PreparedStatement pst;
         Connection connection = ConnectionDB.getConnect();
 
@@ -1240,16 +1588,16 @@ public class Import extends javax.swing.JPanel {
             return;
         }
         entity.HoaDonChiTietNhap hoaDonChiTietNhap = getInputHoaDonChiTietNhap();
-        if(updateHoaDonChiTietNhap(hoaDonChiTietNhap)){
+        if (updateHoaDonChiTietNhap(hoaDonChiTietNhap)) {
             JOptionPane.showMessageDialog(null, "Update thành công");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Update thất bại");
         }
-        
+
         DefaultTableModel tableModel = (DefaultTableModel) tableImport2.getModel();
         tableModel.setNumRows(0);
         String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap where maHDN ='" + lbInputInvoice.getText().toString() + "';";
-        
+
         PreparedStatement pst;
         Connection connection = ConnectionDB.getConnect();
 
@@ -1268,7 +1616,254 @@ public class Import extends javax.swing.JPanel {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
         }
+
+        productCombo.setSelectedItem("Chọn mã sản phẩm");
+        productName.setText("");
+        quantity.setText("");
+        cost.setText("");
     }//GEN-LAST:event_editData2ActionPerformed
+
+    private void searchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBoxActionPerformed
+
+    }//GEN-LAST:event_searchBoxActionPerformed
+
+    private void propertiesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_propertiesActionPerformed
+        exportFile.setEnabled(true);
+        if (searchBox.getText().equals("")) {
+            return;
+        }
+        JComboBox<String> combo = (JComboBox<String>) evt.getSource();
+        String selected = (String) combo.getSelectedItem();
+        ConnectionDB connectionDB = new ConnectionDB();
+        Connection con = connectionDB.getConnect();
+        if (selected != null) {
+            switch (selected) {
+                case "Mã hoá đơn nhập": {
+                    try {
+                        ((DefaultTableModel) tableImport1.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonnhap WHERE maHDN like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 5; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableImport1.getModel()).addRow(vector);
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        ((DefaultTableModel) tableImport2.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap WHERE maHDN like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 4; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableImport2.getModel()).addRow(vector);
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+
+                case "Mã nhà cung cấp": {
+                    String[] maHDN = new String[100];
+                    int count = 0;
+                    try {
+                        ((DefaultTableModel) tableImport1.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonnhap WHERE maNCC like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            maHDN[count] = rs.getString("maHDN");
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 5; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableImport1.getModel()).addRow(vector);
+
+                            count++;
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        DefaultTableModel table = ((DefaultTableModel) tableImport2.getModel());
+                        table.setNumRows(0);
+                        for (int k = 0; k < count; k++) {
+
+                            String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap WHERE maHDN like '%" + maHDN[k] + "%'";
+                            Statement st = con.createStatement();
+                            ResultSet rs = st.executeQuery(sql);
+                            while (rs.next()) {
+                                Vector<String> vector = new Vector<>();
+                                for (int i = 0; i < 4; i++) {
+                                    vector.add(rs.getString(i + 1));
+                                }
+                                table.addRow(vector);
+                            }
+
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+
+                case "Mã nhân viên": {
+                    String[] maHDN = new String[100];
+                    int count = 0;
+                    try {
+                        ((DefaultTableModel) tableImport1.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonnhap WHERE maNV like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            maHDN[count] = rs.getString("maHDN");
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 5; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableImport1.getModel()).addRow(vector);
+
+                            count++;
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        DefaultTableModel table = ((DefaultTableModel) tableImport2.getModel());
+                        table.setNumRows(0);
+                        for (int k = 0; k < count; k++) {
+
+                            String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap WHERE maHDN like '%" + maHDN[k] + "%'";
+                            Statement st = con.createStatement();
+                            ResultSet rs = st.executeQuery(sql);
+                            while (rs.next()) {
+                                Vector<String> vector = new Vector<>();
+                                for (int i = 0; i < 4; i++) {
+                                    vector.add(rs.getString(i + 1));
+                                }
+                                table.addRow(vector);
+                            }
+
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+
+                case "Mã sản phẩm": {
+                    String[] maHDN = new String[100];
+                    int count = 0;
+                    try {
+                        ((DefaultTableModel) tableImport2.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap WHERE maSP like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            maHDN[count] = rs.getString("maHDN");
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 4; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableImport2.getModel()).addRow(vector);
+
+                            count++;
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        DefaultTableModel table = ((DefaultTableModel) tableImport1.getModel());
+                        table.setNumRows(0);
+                        for (int k = 0; k < count; k++) {
+
+                            String sql = "SELECT * FROM quanlybangiay.hoadonnhap WHERE maHDN like '%" + maHDN[k] + "%'";
+                            Statement st = con.createStatement();
+                            ResultSet rs = st.executeQuery(sql);
+                            while (rs.next()) {
+                                Vector<String> vector = new Vector<>();
+                                for (int i = 0; i < 5; i++) {
+                                    vector.add(rs.getString(i + 1));
+                                }
+                                table.addRow(vector);
+                            }
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+
+                case "Ngày nhập hàng": {
+                    String[] maHDN = new String[100];
+                    int count = 0;
+                    try {
+                        ((DefaultTableModel) tableImport1.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.hoadonnhap WHERE ngayNhanHang like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            maHDN[count] = rs.getString("maHDN");
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 5; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableImport1.getModel()).addRow(vector);
+
+                            count++;
+                        }
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        DefaultTableModel table = ((DefaultTableModel) tableImport2.getModel());
+                        table.setNumRows(0);
+                        for (int k = 0; k < count; k++) {
+
+                            String sql = "SELECT * FROM quanlybangiay.hoadonchitietnhap WHERE maHDN like '%" + maHDN[k] + "%'";
+                            Statement st = con.createStatement();
+                            ResultSet rs = st.executeQuery(sql);
+                            while (rs.next()) {
+                                Vector<String> vector = new Vector<>();
+                                for (int i = 0; i < 4; i++) {
+                                    vector.add(rs.getString(i + 1));
+                                }
+                                table.addRow(vector);
+                            }
+
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+            }
+        }
+    }//GEN-LAST:event_propertiesActionPerformed
+
+    private void searchBoxMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_searchBoxMouseEntered
+
+    }//GEN-LAST:event_searchBoxMouseEntered
 
     /**
      * đưa các dữ liệu từ các bảng đơn tới comboBox
@@ -1339,7 +1934,7 @@ public class Import extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearData1;
     private javax.swing.JButton clearData2;
-    private javax.swing.JTextField cost;
+    private javax.swing.JLabel cost;
     private javax.swing.JTextField createDay;
     private javax.swing.JButton editData1;
     private javax.swing.JButton editData2;
@@ -1349,7 +1944,6 @@ public class Import extends javax.swing.JPanel {
     private javax.swing.JTextField inputInvoice;
     private javax.swing.JButton insertData1;
     private javax.swing.JButton insertData2;
-    private javax.swing.JButton jButton7;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel18;
@@ -1376,8 +1970,10 @@ public class Import extends javax.swing.JPanel {
     private javax.swing.JLabel lbInputInvoice;
     private javax.swing.JComboBox<String> productCombo;
     private javax.swing.JLabel productName;
+    private javax.swing.JComboBox<String> properties;
     private javax.swing.JTextField quantity;
     private javax.swing.JTextField receiveDay;
+    private javax.swing.JTextField searchBox;
     private javax.swing.JComboBox<String> supplierCombo;
     private javax.swing.JLabel supplierName;
     public javax.swing.JTable tableImport1;
