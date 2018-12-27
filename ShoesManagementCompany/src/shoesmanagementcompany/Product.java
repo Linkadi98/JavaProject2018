@@ -86,7 +86,7 @@ public class Product extends javax.swing.JPanel {
         jScrollPane9 = new javax.swing.JScrollPane();
         tableProduct = new javax.swing.JTable();
         searchBox = new javax.swing.JTextField();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        properties = new javax.swing.JComboBox<>();
 
         jToolBar4.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar4.setRollover(true);
@@ -160,17 +160,17 @@ public class Product extends javax.swing.JPanel {
         tableProduct.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         tableProduct.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã sản phẩm", "Tên sản phẩm", "Mã nhà cung cấp", "Ngày nhập", "Nhà sản xuất", "Đơn giá nhập", "Đơn giá xuất", "Thể loại", "Đơn vị tính", "Kích thước", "Màu", "Sex"
+                "Mã sản phẩm", "Tên sản phẩm", "Mã nhà cung cấp", "Nhà sản xuất", "Đơn giá nhập", "Đơn giá xuất", "Thể loại", "Đơn vị tính", "Kích thước", "Màu", "Sex", "Số lượng còn", "Tổng số lượng"
             }
         ));
         tableProduct.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -189,7 +189,12 @@ public class Product extends javax.swing.JPanel {
 
         searchBox.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        properties.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "chọn", "Mã sản phẩm", "Tên sản phẩm", "Mã nhà cung cấp", "Nhà sản xuất", "Thể loại ", "Kích thước", "Màu", "Sex", " " }));
+        properties.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                propertiesActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -204,7 +209,7 @@ public class Product extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 211, Short.MAX_VALUE)
                 .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(29, 29, 29)
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane9))
@@ -218,7 +223,7 @@ public class Product extends javax.swing.JPanel {
                     .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane9, javax.swing.GroupLayout.DEFAULT_SIZE, 553, Short.MAX_VALUE))
         );
@@ -389,7 +394,7 @@ public class Product extends javax.swing.JPanel {
             while (rs.next()) {
                 tableModel.addRow(new Object[]{rs.getString(1), rs.getString(2),
                     rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9),
-                    rs.getString(10), rs.getString(11), rs.getString(11)
+                    rs.getString(10), rs.getString(11), rs.getString(12), rs.getString(13)
                 });
                 inserted[row] = true;
                 row++;
@@ -820,11 +825,11 @@ public class Product extends javax.swing.JPanel {
     private javax.swing.JButton importFile;
     private javax.swing.JButton insertData;
     private javax.swing.JButton jButton7;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JScrollPane jScrollPane9;
     private javax.swing.JToolBar jToolBar4;
     private javax.swing.JToolBar jToolBar5;
     private javax.swing.JToolBar jToolBar6;
+    private javax.swing.JComboBox<String> properties;
     private javax.swing.JTextField searchBox;
     public javax.swing.JTable tableProduct;
     private javax.swing.JButton viewData;
