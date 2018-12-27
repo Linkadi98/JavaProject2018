@@ -725,11 +725,12 @@ public class Import extends javax.swing.JPanel {
         }
         return tenNV;
     }
-    
+
     /**
      * Lấy tên sản phẩm từ mã sản phẩm
+     *
      * @param maNCC
-     * @return 
+     * @return
      */
     public String getTenSP(String maSP) {
         String tenSP = null;
@@ -766,7 +767,7 @@ public class Import extends javax.swing.JPanel {
                         String text = r.getText(0);
                         if (text != null) {
                             if (text.contains("HDN")) {
-                                text = text.replace("HDN", tableImport1.getValueAt(0, 0).toString() + "      ");                               
+                                text = text.replace("HDN", tableImport1.getValueAt(0, 0).toString() + "      ");
                                 r.addBreak();
                                 r.setText(text, 0);
                             }
@@ -882,15 +883,15 @@ public class Import extends javax.swing.JPanel {
         String f1 = "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\Quản Lý Nhập\\";
         String f2 = null;
         String sql = null;
-        
-        if(properties.getSelectedItem().toString().equals("Tìm kiếm theo") || searchBox.getText().equals("")){
+
+        if (properties.getSelectedItem().toString().equals("Tìm kiếm theo") || searchBox.getText().equals("")) {
             JOptionPane.showMessageDialog(null, "Bạn phải chọn tiêu chuẩn tìm kiếm");
             return;
         }
-        
+
         if (properties.getSelectedItem().toString().equals("Mã hoá đơn nhập")) {
             f2 = "Hoá đơn nhập.docx";
-        } else if (properties.getSelectedItem().toString().equals("Mã nhà cung cấp")) {           
+        } else if (properties.getSelectedItem().toString().equals("Mã nhà cung cấp")) {
 
             f2 = "Tìm kiếm theo mã nhà cung cấp.docx";
             sql = "SELECT A.maHDN, maSP, maNCC, maNV, ngayNhanHang, ngayLap, soLuong, thanhTien\n"
@@ -1125,6 +1126,8 @@ public class Import extends javax.swing.JPanel {
         String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonchitietnhap` "
                 + "(`maHDN`, `maSP`, `soLuong`, `thanhTien`) "
                 + "VALUES (?, ?, ?, ?);";
+        String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `tongSoLuong` = `tongSoLuong` + " + quantity.getText()
+                + " WHERE (`maSP` = '" + productCombo.getSelectedItem().toString() + "');";
         PreparedStatement pst = null;
         Connection connection = ConnectionDB.getConnect();
         try {
@@ -1135,7 +1138,11 @@ public class Import extends javax.swing.JPanel {
             pst.setInt(4, hoaDonChiTietNhap.getThanhTien());
 
             if (pst.executeUpdate() > 0) {
-
+                int row = tableImport1.getSelectedRow();
+                if (!tableImport1.getValueAt(row, 4).toString().equals("0000-00-00")) {
+                    PreparedStatement ps = connection.prepareStatement(sqlUpdate);
+                    ps.executeUpdate();
+                }
             } else {
                 JOptionPane.showMessageDialog(null, "Không thể thêm ! Xin kiểm tra lại !");
             }
@@ -1367,7 +1374,6 @@ public class Import extends javax.swing.JPanel {
                 + "ngayLap = ?, "
                 + "ngayNhanHang = ? "
                 + "where MaHDN = ?";
-
         PreparedStatement pst = null;
         Connection connection = ConnectionDB.getConnect();
         try {
@@ -1378,8 +1384,16 @@ public class Import extends javax.swing.JPanel {
             pst.setString(4, hoaDonNhap.getNgayLap());
             pst.setString(5, hoaDonNhap.getNgayNhanHang());
             pst.setString(6, lbInputInvoice.getText().toString());
-
             if (pst.executeUpdate() > 0) {
+                int row = tableImport1.getSelectedRow();
+                if (tableImport1.getValueAt(row, 4).toString().equals("0000-00-00") && !receiveDay.getText().equals("")) {
+                    for (int i = 0; i < tableImport2.getRowCount(); i++) {
+                        String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `tongSoLuong` = `tongSoLuong` + "
+                                + tableImport2.getValueAt(i, 2) + " WHERE (`maSP` = '" + tableImport2.getValueAt(i, 1) + "');";
+                        PreparedStatement ps = connection.prepareStatement(sqlUpdate);
+                        ps.executeUpdate();
+                    }
+                }
                 return true;
             } else {
                 return false;
@@ -1412,6 +1426,15 @@ public class Import extends javax.swing.JPanel {
             pst.setString(6, productCombo.getSelectedItem().toString());
 
             if (pst.executeUpdate() > 0) {
+                if (!tableImport1.getValueAt(tableImport1.getSelectedRow(), 4).toString().equals("")) {
+                    int s1 = Integer.parseInt(tableImport2.getValueAt(tableImport2.getSelectedRow(), 2).toString());
+                    int s2 = Integer.parseInt(quantity.getText().toString());
+                    String sqlUpdate = "UPDATE `quanlybangiay`.`sanpham` SET `tongSoLuong` = `tongSoLuong` + "
+                            + (s2 - s1)
+                            + "  WHERE (`maSP` = '" + productCombo.getSelectedItem().toString() + "');";
+                    PreparedStatement ps = connection.prepareStatement(sqlUpdate);
+                    ps.executeUpdate();
+                }
                 return true;
             } else {
                 return false;

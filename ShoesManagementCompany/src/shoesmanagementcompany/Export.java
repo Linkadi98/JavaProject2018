@@ -1605,7 +1605,7 @@ public class Export extends javax.swing.JPanel {
     }//GEN-LAST:event_clearData2ActionPerformed
 
     private void editData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editData2ActionPerformed
-        int row = tableExport2.getSelectedRow();
+         int row = tableExport2.getSelectedRow();
         if (row < 0) {
             JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
             return;
