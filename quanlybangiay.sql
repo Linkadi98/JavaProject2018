@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 15, 2018 at 11:17 AM
+-- Generation Time: Dec 28, 2018 at 10:32 AM
 -- Server version: 10.1.36-MariaDB
 -- PHP Version: 7.2.11
 
@@ -25,6 +25,28 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `admin`
+--
+
+CREATE TABLE `admin` (
+  `id` int(11) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`id`, `username`, `password`, `name`) VALUES
+(1, 'manhronado', 'manhthinh98', 'V? Duy M?nh'),
+(2, 'linkadi98', '123456', 'Ph?m Ng?c Minh'),
+(3, 'ledinhphuc98', '123456', 'Lê ?ình Phúc');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `hoadonchitietnhap`
 --
 
@@ -40,10 +62,12 @@ CREATE TABLE `hoadonchitietnhap` (
 --
 
 INSERT INTO `hoadonchitietnhap` (`maHDN`, `maSP`, `soLuong`, `thanhTien`) VALUES
-('H01', 'S01', 4, 3600000),
-('H01', 'S02', 3, 4500000),
+('H01', 'S01', 5, 4500000),
+('H01', 'S02', 2, 3000000),
+('H02', 'S01', 2, 1800000),
 ('H02', 'S03', 10, 15000000),
 ('H02', 'S05', 3, 2550000),
+('H03', 'S01', 2, 1800000),
 ('H03', 'S04', 6, 14000000),
 ('H04', 'S01', 9, 10000000),
 ('H04', 'S04', 10, 10000000),
@@ -69,14 +93,15 @@ CREATE TABLE `hoadonchitietxuat` (
 --
 
 INSERT INTO `hoadonchitietxuat` (`maHDX`, `maSP`, `soLuong`, `thanhTien`) VALUES
-('H01', 'S01', 2, 2400000),
-('H01', 'S04', 1, 1350000),
+('H01', 'S01', 3, 3600000),
+('H01', 'S04', 2, 2700000),
 ('H01', 'S05', 2, 2000000),
 ('H02', 'S01', 1, 1200000),
 ('H02', 'S02', 1, 1200000),
 ('H02', 'S04', 2, 2700000),
 ('H03', 'S05', 1, 1200000),
 ('H04', 'S03', 4, 6400000),
+('H05', 'S01', 2, 2400000),
 ('H05', 'S04', 3, 4050000);
 
 -- --------------------------------------------------------
@@ -237,15 +262,21 @@ CREATE TABLE `sanpham` (
 --
 
 INSERT INTO `sanpham` (`maSP`, `tenSP`, `maNCC`, `nhaSanXuat`, `donGiaNhap`, `donGiaXuat`, `theLoai`, `donViTinh`, `kichThuoc`, `mau`, `gender`, `soLuongCon`, `tongSoLuong`) VALUES
-('S01', 'Converse classic cao cổ vàng', 'NCC01', 'Converse', 900000, 1200000, 'Sneaker', 'đôi', 41, 'Vàng', 'Unisex', 10, 100),
-('S02', 'New Blance 500 Sneaker', 'NCC04', 'New Blance', 1500000, 1700000, 'Sneaker', 'đôi', 40, 'Đen trắng', 'Unisex', 20, 200),
+('S01', 'Converse classic cao cổ vàng', 'NCC01', 'Converse', 900000, 1200000, 'Sneaker', 'đôi', 41, 'Vàng', 'Unisex', 11, 108),
+('S02', 'New Blance 500 Sneaker', 'NCC04', 'New Blance', 1500000, 1700000, 'Sneaker', 'đôi', 40, 'Đen trắng', 'Unisex', 19, 199),
 ('S03', 'Vans Vault', 'NCC05', 'Vans', 1400000, 1600000, 'Sneaker', 'đôi', 43, 'Đen trắng', 'Unisex', 5, 150),
-('S04', 'Adidas Ultraboost', 'NCC02', 'Adidas', 1000000, 1350000, 'Lifestyle', 'đôi', 42, 'Xanh ', 'Women', 25, 50),
+('S04', 'Adidas Ultraboost', 'NCC02', 'Adidas', 1000000, 1350000, 'Lifestyle', 'đôi', 42, 'Xanh ', 'Women', 24, 50),
 ('S05', 'Nike Air Max', 'NCC03', 'Nike', 850000, 1000000, 'Sneaker', 'đôi', 39, 'Trắng', 'Men', 10, 44);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `admin`
+--
+ALTER TABLE `admin`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `hoadonchitietnhap`
@@ -301,6 +332,16 @@ ALTER TABLE `nhanvien`
 ALTER TABLE `sanpham`
   ADD PRIMARY KEY (`maSP`),
   ADD KEY `maNCC` (`maNCC`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables

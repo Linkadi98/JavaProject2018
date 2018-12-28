@@ -1053,14 +1053,14 @@ public class Import extends javax.swing.JPanel {
      *
      * @return đối tượng hoaDonNhap
      */
-    public entity.HoaDonNhap getInputHoaDonNhap() {
+    public bill.HoaDonNhap getInputHoaDonNhap() {
         String maHDN = inputInvoice.getText();
         String maNCC = supplierCombo.getSelectedItem().toString();
         String maNV = employeeCombo.getSelectedItem().toString();
         String ngayLap = createDay.getText();
         String ngayNhanHang = receiveDay.getText();
 
-        entity.HoaDonNhap hoaDonNhap = new entity.HoaDonNhap(maHDN, maNCC, maNV, ngayLap, ngayNhanHang);
+        bill.HoaDonNhap hoaDonNhap = new bill.HoaDonNhap(maHDN, maNCC, maNV, ngayLap, ngayNhanHang);
         return hoaDonNhap;
     }
 
@@ -1069,7 +1069,7 @@ public class Import extends javax.swing.JPanel {
      *
      * @return đối tượng hoaDonNhap
      */
-    public entity.HoaDonChiTietNhap getInputHoaDonChiTietNhap() {
+    public bill.HoaDonChiTietNhap getInputHoaDonChiTietNhap() {
         String maHDN = lbInputInvoice.getText();
         String maSP = productCombo.getSelectedItem().toString();
         int soLuong = Integer.parseInt(quantity.getText());
@@ -1089,7 +1089,7 @@ public class Import extends javax.swing.JPanel {
         }
         int thanhTien = donGiaNhap * soLuong;
 
-        entity.HoaDonChiTietNhap hoaDonChiTietNhap = new entity.HoaDonChiTietNhap(maHDN, maSP, soLuong, thanhTien);
+        bill.HoaDonChiTietNhap hoaDonChiTietNhap = new bill.HoaDonChiTietNhap(maHDN, maSP, soLuong, thanhTien);
         return hoaDonChiTietNhap;
     }
 
@@ -1098,7 +1098,7 @@ public class Import extends javax.swing.JPanel {
      *
      * @param hoaDonNhap
      */
-    public void insertHoaDonNhapToDB(entity.HoaDonNhap hoaDonNhap) {
+    public void insertHoaDonNhapToDB(bill.HoaDonNhap hoaDonNhap) {
         String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonnhap` "
                 + "(`maHDN`, `maNCC`, `maNV`, `ngayLap`, `ngayNhanHang`) "
                 + "VALUES (?, ?, ?, ?, ?);";
@@ -1122,7 +1122,7 @@ public class Import extends javax.swing.JPanel {
         }
     }
 
-    public void insertHoaDonChiTietNhapToDB(entity.HoaDonChiTietNhap hoaDonChiTietNhap) {
+    public void insertHoaDonChiTietNhapToDB(bill.HoaDonChiTietNhap hoaDonChiTietNhap) {
         String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonchitietnhap` "
                 + "(`maHDN`, `maSP`, `soLuong`, `thanhTien`) "
                 + "VALUES (?, ?, ?, ?);";
@@ -1158,7 +1158,7 @@ public class Import extends javax.swing.JPanel {
 
     private void insertData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertData1ActionPerformed
         checkAdd(tableImport1, inputInvoice);
-        entity.HoaDonNhap hoaDonNhap = this.getInputHoaDonNhap();
+        bill.HoaDonNhap hoaDonNhap = this.getInputHoaDonNhap();
         insertHoaDonNhapToDB(hoaDonNhap);
         loadDataToTable(tableImport1);
         resetInputImport();
@@ -1328,7 +1328,7 @@ public class Import extends javax.swing.JPanel {
             return;
         }
         checkAddHoaDonChiTietNhap();
-        entity.HoaDonChiTietNhap hoaDonChiTietNhap = this.getInputHoaDonChiTietNhap();
+        bill.HoaDonChiTietNhap hoaDonChiTietNhap = this.getInputHoaDonChiTietNhap();
         insertHoaDonChiTietNhapToDB(hoaDonChiTietNhap);
 
         /**
@@ -1369,7 +1369,7 @@ public class Import extends javax.swing.JPanel {
      * @param hoaDonNhap
      * @return true nếu update thành công
      */
-    public boolean updateHoaDonNhap(entity.HoaDonNhap hoaDonNhap) {
+    public boolean updateHoaDonNhap(bill.HoaDonNhap hoaDonNhap) {
         String sqlCommand = "update hoadonnhap"
                 + " set MaHDN = ?, "
                 + "MaNCC = ?, "
@@ -1410,7 +1410,7 @@ public class Import extends javax.swing.JPanel {
         return false;
     }
 
-    public boolean updateHoaDonChiTietNhap(entity.HoaDonChiTietNhap hoaDonChiTietNhap) {
+    public boolean updateHoaDonChiTietNhap(bill.HoaDonChiTietNhap hoaDonChiTietNhap) {
         String sqlCommand = "update hoadonchitietnhap "
                 + "set MaHDN = ?, "
                 + "MaSP = ?, "
@@ -1440,8 +1440,7 @@ public class Import extends javax.swing.JPanel {
                             + "  WHERE (`maSP` = '" + productCombo.getSelectedItem().toString() + "');";
                     PreparedStatement ps = connection.prepareStatement(sqlUpdate);
                     ps.executeUpdate();
-                }
-                JOptionPane.showMessageDialog(null, "Bạn đã sửa thành công.");
+                }        
                 return true;
             } else {
                 return false;
@@ -1458,7 +1457,7 @@ public class Import extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        entity.HoaDonNhap hoaDonNhap = getInputHoaDonNhap();
+        bill.HoaDonNhap hoaDonNhap = getInputHoaDonNhap();
         if (updateHoaDonNhap(hoaDonNhap)) {
             JOptionPane.showMessageDialog(null, "Bạn đã sửa thành công");
         } else {
@@ -1617,7 +1616,7 @@ public class Import extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        entity.HoaDonChiTietNhap hoaDonChiTietNhap = getInputHoaDonChiTietNhap();
+        bill.HoaDonChiTietNhap hoaDonChiTietNhap = getInputHoaDonChiTietNhap();
         if (updateHoaDonChiTietNhap(hoaDonChiTietNhap)) {
             JOptionPane.showMessageDialog(null, "Bạn đã sửa thành công");
         } else {

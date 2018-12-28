@@ -1051,14 +1051,14 @@ public class Export extends javax.swing.JPanel {
      *
      * @return đối tượng hoaDonXuat
      */
-    public entity.HoaDonXuat getInputHoaDonXuat() {
+    public bill.HoaDonXuat getInputHoaDonXuat() {
         String maHDX = exportInvoice.getText();
         String maKH = customerCombo.getSelectedItem().toString();
         String maNV = employeeCombo.getSelectedItem().toString();
         String ngayLap = createDay.getText();
         String ngayXuatHang = exportDay.getText();
 
-        entity.HoaDonXuat hoaDonXuat = new entity.HoaDonXuat(maHDX, maKH, maNV, ngayLap, ngayXuatHang);
+        bill.HoaDonXuat hoaDonXuat = new bill.HoaDonXuat(maHDX, maKH, maNV, ngayLap, ngayXuatHang);
         return hoaDonXuat;
     }
 
@@ -1067,7 +1067,7 @@ public class Export extends javax.swing.JPanel {
      *
      * @return đối tượng hoaDonXuat
      */
-    public entity.HoaDonChiTietXuat getInputHoaDonChiTietXuat() {
+    public bill.HoaDonChiTietXuat getInputHoaDonChiTietXuat() {
         String maHDX = lbExportInvoice.getText();
         String maSP = productCombo.getSelectedItem().toString();
         int soLuong = Integer.parseInt(quantity.getText());
@@ -1087,7 +1087,7 @@ public class Export extends javax.swing.JPanel {
         }
         int thanhTien = donGiaXuat * soLuong;
 
-        entity.HoaDonChiTietXuat hoaDonChiTietXuat = new entity.HoaDonChiTietXuat(maHDX, maSP, soLuong, thanhTien);
+        bill.HoaDonChiTietXuat hoaDonChiTietXuat = new bill.HoaDonChiTietXuat(maHDX, maSP, soLuong, thanhTien);
         return hoaDonChiTietXuat;
     }
 
@@ -1096,7 +1096,7 @@ public class Export extends javax.swing.JPanel {
      *
      * @param hoaDonXuat
      */
-    public void insertHoaDonXuatToDB(entity.HoaDonXuat hoaDonXuat) {
+    public void insertHoaDonXuatToDB(bill.HoaDonXuat hoaDonXuat) {
         String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonxuat` "
                 + "(`maHDX`, `maKH`, `maNV`, `ngayLap`, `ngayXuatHang`) "
                 + "VALUES (?, ?, ?, ?, ?);";
@@ -1120,7 +1120,7 @@ public class Export extends javax.swing.JPanel {
         }
     }
 
-    public void insertHoaDonChiTietXuatToDB(entity.HoaDonChiTietXuat hoaDonChiTietXuat) {
+    public void insertHoaDonChiTietXuatToDB(bill.HoaDonChiTietXuat hoaDonChiTietXuat) {
         String sqlCommand = "INSERT INTO `quanlybangiay`.`hoadonchitietxuat` "
                 + "(`maHDX`, `maSP`, `soLuong`, `thanhTien`) "
                 + "VALUES (?, ?, ?, ?);";
@@ -1154,7 +1154,7 @@ public class Export extends javax.swing.JPanel {
 
     private void insertData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertData1ActionPerformed
         checkAdd(tableExport1, exportInvoice);
-        entity.HoaDonXuat hoaDonXuat = this.getInputHoaDonXuat();
+        bill.HoaDonXuat hoaDonXuat = this.getInputHoaDonXuat();
         insertHoaDonXuatToDB(hoaDonXuat);
 
         loadDataToTable(tableExport1);
@@ -1325,7 +1325,7 @@ public class Export extends javax.swing.JPanel {
             return;
         }
         checkAddHoaDonChiTietXuat();
-        entity.HoaDonChiTietXuat hoaDonChiTietXuat = this.getInputHoaDonChiTietXuat();
+        bill.HoaDonChiTietXuat hoaDonChiTietXuat = this.getInputHoaDonChiTietXuat();
         insertHoaDonChiTietXuatToDB(hoaDonChiTietXuat);
 
         /**
@@ -1366,7 +1366,7 @@ public class Export extends javax.swing.JPanel {
      * @param hoaDonXuat
      * @return true nếu update thành công
      */
-    public boolean updateHoaDonXuat(entity.HoaDonXuat hoaDonXuat) {
+    public boolean updateHoaDonXuat(bill.HoaDonXuat hoaDonXuat) {
         String sqlCommand = "update hoadonxuat"
                 + " set MaHDX = ?, "
                 + "MaKH = ?, "
@@ -1407,7 +1407,7 @@ public class Export extends javax.swing.JPanel {
         return false;
     }
 
-    public boolean updateHoaDonChiTietXuat(entity.HoaDonChiTietXuat hoaDonChiTietXuat) {
+    public boolean updateHoaDonChiTietXuat(bill.HoaDonChiTietXuat hoaDonChiTietXuat) {
         String sqlCommand = "update hoadonchitietxuat "
                 + "set MaHDX = ?, "
                 + "MaSP = ?, "
@@ -1453,7 +1453,7 @@ public class Export extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        entity.HoaDonXuat hoaDonXuat = getInputHoaDonXuat();
+        bill.HoaDonXuat hoaDonXuat = getInputHoaDonXuat();
         if (updateHoaDonXuat(hoaDonXuat)) {
             JOptionPane.showMessageDialog(null, "Update thành công");
         } else {
@@ -1612,7 +1612,7 @@ public class Export extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Bạn phải chọn 1 hàng trong bảng", "Error Update", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        entity.HoaDonChiTietXuat hoaDonChiTietXuat = getInputHoaDonChiTietXuat();
+        bill.HoaDonChiTietXuat hoaDonChiTietXuat = getInputHoaDonChiTietXuat();
         if (updateHoaDonChiTietXuat(hoaDonChiTietXuat)) {
             JOptionPane.showMessageDialog(null, "Bạn đã sửa thành công");
         } else {

@@ -15,14 +15,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,8 +48,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
+import org.apache.poi.xwpf.usermodel.TableRowAlign;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -60,7 +66,7 @@ public class Product extends javax.swing.JPanel {
      * Creates new form Product
      */
     public boolean[] inserted = new boolean[100000];
-
+    
     public Product() {
         initComponents();
     }
@@ -79,10 +85,8 @@ public class Product extends javax.swing.JPanel {
         exportFile = new javax.swing.JButton();
         jToolBar5 = new javax.swing.JToolBar();
         viewData = new javax.swing.JButton();
-        clearData = new javax.swing.JButton();
         insertData = new javax.swing.JButton();
         jToolBar6 = new javax.swing.JToolBar();
-        jButton7 = new javax.swing.JButton();
         jScrollPane9 = new javax.swing.JScrollPane();
         tableProduct = new javax.swing.JTable();
         searchBox = new javax.swing.JTextField();
@@ -124,16 +128,6 @@ public class Product extends javax.swing.JPanel {
         });
         jToolBar5.add(viewData);
 
-        clearData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Delete_Database_37px.png"))); // NOI18N
-        clearData.setToolTipText("Xoá bảng");
-        clearData.setOpaque(false);
-        clearData.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clearDataActionPerformed(evt);
-            }
-        });
-        jToolBar5.add(clearData);
-
         insertData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Add_Database_37px.png"))); // NOI18N
         insertData.setToolTipText("Thêm");
         insertData.setOpaque(false);
@@ -146,16 +140,6 @@ public class Product extends javax.swing.JPanel {
 
         jToolBar6.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar6.setRollover(true);
-
-        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Combo_Chart_37px.png"))); // NOI18N
-        jButton7.setToolTipText("Thống kê");
-        jButton7.setOpaque(false);
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton7ActionPerformed(evt);
-            }
-        });
-        jToolBar6.add(jButton7);
 
         tableProduct.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         tableProduct.setModel(new javax.swing.table.DefaultTableModel(
@@ -189,7 +173,7 @@ public class Product extends javax.swing.JPanel {
 
         searchBox.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
-        properties.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "chọn", "Mã sản phẩm", "Tên sản phẩm", "Mã nhà cung cấp", "Nhà sản xuất", "Thể loại ", "Kích thước", "Màu", "Sex", " " }));
+        properties.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tìm kiếm theo", "Mã sản phẩm", "Tên sản phẩm", "Mã nhà cung cấp", "Nhà sản xuất", "Thể loại ", "Kích thước", "Màu", "Sex", " " }));
         properties.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 propertiesActionPerformed(evt);
@@ -201,18 +185,21 @@ public class Product extends javax.swing.JPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 211, Short.MAX_VALUE)
-                .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(29, 29, 29)
-                .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane9))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 409, Short.MAX_VALUE)
+                        .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(29, 29, 29)
+                        .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane9)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -225,7 +212,7 @@ public class Product extends javax.swing.JPanel {
                         .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane9, javax.swing.GroupLayout.DEFAULT_SIZE, 553, Short.MAX_VALUE))
+                .addComponent(jScrollPane9, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -245,7 +232,7 @@ public class Product extends javax.swing.JPanel {
             return;
         }
         // chỗ này sẽ delete hết các dòng trước khi nhập dữ liệu từ file
-
+        ((DefaultTableModel) tableProduct.getModel()).setNumRows(0);
         // vector lưu tên cột
         Vector columns = new Vector();
         try {
@@ -294,7 +281,7 @@ public class Product extends javax.swing.JPanel {
             Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_importFileActionPerformed
-
+    
     private boolean isEmptyRow(int row) {
         DefaultTableModel tableModel = (DefaultTableModel) tableProduct.getModel();
         for (int i = 0; i < tableProduct.getColumnCount(); i++) {
@@ -305,77 +292,173 @@ public class Product extends javax.swing.JPanel {
         }
         return false;
     }
-
+    
     private void addRowData(XWPFTable table, int lastRowPosition) {
         for (int i = lastRowPosition - 1; i < tableProduct.getRowCount(); i++) {
             XWPFTableRow newRow = table.createRow();
             for (int j = 0; j < table.getRow(i).getTableCells().size(); j++) {
                 newRow.getCell(j).setText(tableProduct.getValueAt(i, j).toString());
             }
-
+            
         }
     }
-
+    
     private static void removeParagraphs(XWPFTableCell tableCell) {
         int count = tableCell.getParagraphs().size();
         for (int i = 0; i < count; i++) {
             tableCell.removeParagraph(i);
         }
     }
-
+    
     private void setDefaultTable(XWPFTable table) {
         for (int i = 1; i < table.getRows().size(); i++) {
             table.removeRow(1);
         }
     }
     private void exportFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFileActionPerformed
-        // TODO add your handling code here:
+        String fileName = null;
+        String f0 = System.getProperty("user.home");
+        String f1 = "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\Quản Lý Sản Phẩm\\";
+        String f2 = null;
+        String sql = null;
+        
+        if (properties.getSelectedItem().toString().equals("Chọn") || searchBox.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn tiêu chuẩn tìm kiếm");
+            return;
+        }
+        
+        if (properties.getSelectedItem().toString().equals("Mã sản phẩm")) {
+            f2 = "Tìm kiếm theo mã sản phẩm.docx";
+            sql = "SELECT * FROM quanlybangiay.sanpham\n"
+                    + "where maSP = \"" + searchBox.getText() + "\";";            
+        } else if (properties.getSelectedItem().toString().equals("Tên sản phẩm")) {
+            f2 = "Tìm kiếm theo tên sản phẩm.docx";
+            sql = "SELECT * FROM quanlybangiay.sanpham\n"
+                    + "where tenSP like \"%" + searchBox.getText() + "%\";";
+        } else if (properties.getSelectedItem().toString().equals("Mã nhà cung cấp")) {
+            
+            f2 = "Tìm kiếm theo mã nhà cung cấp.docx";
+            sql = "SELECT * FROM quanlybangiay.sanpham\n"
+                    + "where maNCC like \"%" + searchBox.getText() + "%\";";
+            
+        } else if (properties.getSelectedItem().toString().equals("Nhà sản xuất")) {
+            
+            f2 = "Tìm kiếm theo nhà sản xuất.docx";
+            sql = "SELECT * FROM quanlybangiay.sanpham\n"
+                    + "where nhaSanXuat like \"%" + searchBox.getText() + "%\";";
+            
+        } else if (properties.getSelectedItem().toString().equals("Thể loại")) {
+            
+            f2 = "Tìm kiếm theo thể loại.docx";
+            sql = "SELECT * FROM quanlybangiay.sanpham\n"
+                    + "where theLoai like \"%" + searchBox.getText() + "%\";";
+            
+        } else if (properties.getSelectedItem().toString().equals("Kích thước")) {
+            
+            f2 = "Tìm kiếm theo kích thước.docx";
+            sql = "SELECT * FROM quanlybangiay.sanpham\n"
+                    + "where kichThuoc like \"%" + searchBox.getText() + "%\";";
+            
+        } else if (properties.getSelectedItem().toString().equals("Màu")) {
+            
+            f2 = "Tìm kiếm theo màu.docx";
+            sql = "SELECT * FROM quanlybangiay.sanpham\n"
+                    + "where mau like \"%" + searchBox.getText() + "%\";";
+            
+        }
+        
+        fileName = f0 + f1 + f2;
+        
         try {
-            // mở file word, trong đó file word trích đường dẫn như ví dụ bên dưới
-            FileInputStream fis = new FileInputStream(System.getProperty("user.home") + "\\Desktop\\TestWord.docx");
-            XWPFDocument xdoc = new XWPFDocument(OPCPackage.open(fis));
-            // con trỏ duyệt phần thân của file word
-            Iterator bodyElementIterator = xdoc.getBodyElementsIterator();
-            // duyệt phần body
-            while (bodyElementIterator.hasNext()) {
-                IBodyElement element = (IBodyElement) bodyElementIterator.next();
-                // lấy tất cả các bảng trong phần body
-                if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
-                    java.util.List<XWPFTable> tableList = element.getBody().getTables();
-                    // giờ xử lý với từng bảng, vì trong biểu mẫu chỉ có một bảng nên nó sẽ chỉ xử lý 1 lần
-                    for (XWPFTable table : tableList) {
-                        setDefaultTable(table);
-                        for (int i = 1; i < table.getRows().size(); i++) {
-                            for (int j = 0; j < table.getRow(i).getTableCells().size(); j++) {
-                                removeParagraphs(table.getRow(i).getCell(j));
-                                XWPFParagraph paragraph = table.getRow(i).getCell(j).addParagraph();
-                                paragraph.createRun().setText(tableProduct.getValueAt(i - 1, j).toString());
-                            }
+            InputStream file = new FileInputStream(fileName);
+            XWPFDocument docx = new XWPFDocument(OPCPackage.open(file));
+            Iterator bodyElementIterator = docx.getBodyElementsIterator();
+            //Nếu là xuất phiếu mượn thì sửa form
 
+            for (XWPFParagraph p : docx.getParagraphs()) {
+                List<XWPFRun> runs = p.getRuns();
+                if (runs != null) {
+                    for (XWPFRun r : runs) {
+                        r.setFontSize(12);
+                        r.setFontFamily("Times New Roman");
+                        String text = r.getText(0);
+                        if (text != null) {
+                            if (text.contains("ngayxxx")) {
+                                SimpleDateFormat day = new SimpleDateFormat("dd");
+                                SimpleDateFormat month = new SimpleDateFormat("MM");
+                                SimpleDateFormat year = new SimpleDateFormat("yyyy");
+                                Date date = new Date();
+                                String ngay = day.format(date);
+                                String thang = month.format(date);
+                                String nam = year.format(date);
+                                text = text.replace("ngayxxx", "Ngày  " + ngay + "  Tháng  " + thang + "  Năm  " + nam);
+                                r.setText(text, 0);
+                                break;
+                            }
                         }
-                        addRowData(table, table.getRows().size());
                     }
                 }
             }
-            OutputStream out = new FileOutputStream(System.getProperty("user.home") + "\\Desktop\\TestWord.docx");
-            xdoc.write(out);
-            out.close();
-
-        } catch (IOException | InvalidFormatException ex) {
-        }
-        int dialogResult = JOptionPane.showConfirmDialog(null, "File đã tạo thành công!\nBạn có muốn mở file?");
-        if (dialogResult == JOptionPane.YES_OPTION) {
-            if (Desktop.isDesktopSupported()) {
-                try {
-                    File myFile = new File(System.getProperty("user.home") + "\\Desktop\\TestWord.docx");
-                    Desktop.getDesktop().open(myFile);
-                } catch (IOException ex) {
-                    // no application registered for PDFs
+            
+            while (bodyElementIterator.hasNext()) {
+                IBodyElement element = (IBodyElement) bodyElementIterator.next();
+                if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
+                    //Danh sách tất cả Table trong file word
+                    List<XWPFTable> tableList = element.getBody().getTables();
+                    
+                    for (XWPFTable table : tableList) {
+                        //Căn bảng ở giữa file
+                        table.setTableAlignment(TableRowAlign.CENTER);
+                        //  Xóa các dòng thừa trước khi thêm mới
+                        while (table.getRow(1) != null) {
+                            table.removeRow(1);
+                        }
+                        int i = 0;
+                        //Thêm các dòng từ jTable vào table trong word
+                        PreparedStatement ps = null;
+                        Connection connection = ConnectionDB.getConnect();
+                        try {
+                            ps = connection.prepareStatement(sql);
+                            ResultSet rs = ps.executeQuery();
+                            while (rs.next()) {
+                                XWPFTableRow newRow = table.createRow();
+                                
+                                for (int j = 0; j < 14; j++) {                                    
+                                    XWPFParagraph para = newRow.getCell(j).addParagraph();                                    
+                                    
+                                    XWPFRun run = para.createRun();
+                                    if (i > 0) {
+                                        run.setText(rs.getString(j));
+                                    } else {
+                                        run.setText(++i + "");
+                                    }
+                                    run.setFontSize(10);
+                                }
+                            }
+                        } catch (SQLException ex) {
+                            Logger.getLogger(Import.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        
+                    }
                 }
             }
-        } else {
+            OutputStream fOut = new FileOutputStream(f2);
+            docx.write(fOut);
+            fOut.close();
+            //Mở file
+            try {
+                File myFile = new File(f0 + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\" + f2);
+                Desktop.getDesktop().open(myFile);
+            } catch (IOException ex) {
+                // no application registered for PDFs
+                JOptionPane.showConfirmDialog(null, ex.getMessage());
+                ex.printStackTrace();
+            }
+            
+        } catch (IOException | InvalidFormatException ex) {
+            JOptionPane.showConfirmDialog(null, ex.getMessage());
+            Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }//GEN-LAST:event_exportFileActionPerformed
 
     private void viewDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewDataActionPerformed
@@ -405,27 +488,6 @@ public class Product extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_viewDataActionPerformed
 
-    private void clearDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearDataActionPerformed
-         // TODO add your handling code here:
-        int dialog = JOptionPane.showConfirmDialog(null,"Hành động này sẽ xóa toàn bộ dữ liệu trong database. Bạn có chắc mình muốn xóa ?");
-
-        if (dialog == JOptionPane.YES_OPTION) {
-            ConnectionDB connectionDB = new ConnectionDB();
-            Connection con = connectionDB.getConnect();
-
-            String sql = "deletle from quanlybangiay.sanpham";
-            try {
-                con.setAutoCommit(false);
-                PreparedStatement pst = con.prepareStatement(sql);
-                pst.execute();
-                con.commit();
-                JOptionPane.showMessageDialog(null, "Thành công!");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Không thể xoá dữ liệu\n" + "Lỗi: " + e.getMessage());
-            }
-        }
-    }//GEN-LAST:event_clearDataActionPerformed
-
     private void insertDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertDataActionPerformed
         // TODO add your handling code here:
         ConnectionDB connectDB = new ConnectionDB();
@@ -438,7 +500,7 @@ public class Product extends javax.swing.JPanel {
 //                String sql = "INSERT INTO quanlybangiay.sanpham VALUES (?,?,?,?,?,?,?,?,?,?,?,?);";
                 String sql = "INSERT INTO `quanlybangiay`.`sanpham` (`maSP`, `tenSP`, `maNCC`, `ngayNhap`, `nhaSanXuat`, `donGiaNhap`, `donGiaXuat`, `theLoai`, `donViTinh`, `kichThuoc`, `mau`, `sex`) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-
+                
                 try {
                     connection.setAutoCommit(false);
                     PreparedStatement pst = connection.prepareStatement(sql);
@@ -454,12 +516,12 @@ public class Product extends javax.swing.JPanel {
                     pst.setString(10, tableProduct.getValueAt(row, 9).toString());
                     pst.setString(11, tableProduct.getValueAt(row, 10).toString());
                     pst.setString(11, tableProduct.getValueAt(row, 11).toString());
-
+                    
                     pst.addBatch();
                     pst.executeUpdate();
                     connection.commit();
                     JOptionPane.showMessageDialog(null, "Successfully");
-
+                    
                 } catch (HeadlessException | SQLException ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage());
                     ((DefaultTableModel) tableProduct.getModel()).removeRow(row);
@@ -470,11 +532,6 @@ public class Product extends javax.swing.JPanel {
         }
 
     }//GEN-LAST:event_insertDataActionPerformed
-
-    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        // TODO add your handling code here:
-        new ChartFrame().setVisible(true);
-    }//GEN-LAST:event_jButton7ActionPerformed
 
     private void tableProductMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableProductMouseReleased
         // TODO add your handling code here:
@@ -487,7 +544,7 @@ public class Product extends javax.swing.JPanel {
                 } else {
                     tableProduct.clearSelection();
                 }
-
+                
                 int[] rowindex = tableProduct.getSelectedRows();
                 for (int i = 0; i < rowindex.length; i++) {
                     int j = rowindex[i];
@@ -506,11 +563,11 @@ public class Product extends javax.swing.JPanel {
     private void tableProductKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tableProductKeyPressed
         // TODO add your handling code here:
         if (evt.getKeyCode() == KeyEvent.VK_ENTER && tableProduct.getSelectedRow() == tableProduct.getRowCount() - 1) {
-
+            
             ((DefaultTableModel) tableProduct.getModel()).addRow(new Object[]{null});
         }
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-
+            
             tableProduct.requestFocus();
             tableProduct.changeSelection(tableProduct.getSelectedRow(), 0, false, false);
         }
@@ -541,7 +598,7 @@ public class Product extends javax.swing.JPanel {
                             }
                             ((DefaultTableModel) tableProduct.getModel()).addRow(vector);
                         }
-                        System.out.println("done");
+                        
                     } catch (SQLException ex) {
                         Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -603,9 +660,9 @@ public class Product extends javax.swing.JPanel {
                         String sql = "select * from quanlybangiay.sanpham where theLoai like '%" + searchBox.getText() + "%' group by maSP";
                         Statement ps = con.prepareStatement(sql);
                         ResultSet rs = ps.executeQuery(sql);
-                   
+                        
                         while (rs.next()) {
-                             Vector<String> vector = new Vector<>();
+                            Vector<String> vector = new Vector<>();
                             for (int i = 0; i < 13; i++) {
                                 vector.add(rs.getString(i + 1));
                             }
@@ -667,8 +724,6 @@ public class Product extends javax.swing.JPanel {
                     }
                     break;
                 
-                   
-
             }
         }
 
@@ -683,13 +738,13 @@ public class Product extends javax.swing.JPanel {
         JMenuItem insertAbove = new JMenuItem("Insert Above");
         JMenuItem insertBelow = new JMenuItem("Insert Below");
         JMenuItem update = new JMenuItem("Update");
-        Icon icon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-cancel-16.png");
-        Icon deleteDb = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-delete-database-20.png");
-        Icon deleteTb = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-delete-table-25.png");
-        Icon updateIcon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-downloading-updates-20.png");
-        Icon insertIcon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-add-row-25.png");
-        Icon insertBelowIcon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-down-arrow-25.png");
-        Icon insertAboveIcon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-long-arrow-up-25.png");
+        Icon icon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-cancel-16.png");
+        Icon deleteDb = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-delete-database-20.png");
+        Icon deleteTb = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-delete-table-25.png");
+        Icon updateIcon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-downloading-updates-20.png");
+        Icon insertIcon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-add-row-25.png");
+        Icon insertBelowIcon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-down-arrow-25.png");
+        Icon insertAboveIcon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-long-arrow-up-25.png");
         insertMenu.setIcon(insertIcon);
         insertAbove.setIcon(insertAboveIcon);
         insertBelow.setIcon(insertBelowIcon);
@@ -706,7 +761,7 @@ public class Product extends javax.swing.JPanel {
                     int row = rows[i];
                     ConnectionDB connectDB = new ConnectionDB();
                     Connection connection = connectDB.getConnect();
-
+                    
                     DefaultTableModel tableModel = (DefaultTableModel) tableProduct.getModel();
                     String sql = "DELETE FROM `quanlybangiay`.`sanpham` WHERE (`maSP` = ?);";
                     try {
@@ -724,18 +779,18 @@ public class Product extends javax.swing.JPanel {
                     } catch (HeadlessException | SQLException ex) {
                         JOptionPane.showMessageDialog(null, "Can not delele!\n" + ex.getMessage());
                     }
-
+                    
                 }
-
+                
             }
         });
         deleteFromTb.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-
+                
                 int[] rows = tableProduct.getSelectedRows();
                 Arrays.sort(rows);
-
+                
                 for (int i = 0; i < rows.length; i++) {
                     int row = rows[i];
                     ((DefaultTableModel) tableProduct.getModel()).removeRow(row);
@@ -748,16 +803,16 @@ public class Product extends javax.swing.JPanel {
         update.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-
+                
                 ConnectionDB connectDB = new ConnectionDB();
                 Connection connection = connectDB.getConnect();
-
+                
                 DefaultTableModel tableModel = (DefaultTableModel) tableProduct.getModel();
                 int[] rows = tableProduct.getSelectedRows();
                 Arrays.sort(rows);
                 for (int i = 0; i < rows.length; i++) {
                     int row = rows[i];
-
+                    
                     String temp = (String) tableModel.getValueAt(row, 0);
                     String sql = "UPDATE `quanlybangiay`.`sanpham` SET `maSP` = ?, `tenSP` = ?, `maNCC` = ?, `ngayNhap` = ?, "
                             + "`nhaSanXuat` = ?, `donGiaNhap` = ?, `donGiaXuat` = ?, `theLoai` = ?, `donViTinh` = ?, "
@@ -779,7 +834,7 @@ public class Product extends javax.swing.JPanel {
                         pst.setString(10, tableModel.getValueAt(row, 9).toString());
                         pst.setString(11, tableModel.getValueAt(row, 10).toString());
                         pst.setString(11, tableModel.getValueAt(row, 11).toString());
-
+                        
                         pst.addBatch();
                         pst.executeUpdate();
                         connection.commit();
@@ -788,7 +843,7 @@ public class Product extends javax.swing.JPanel {
                         JOptionPane.showMessageDialog(null, "Can not update!\n" + ex.getMessage());
                     }
                 }
-
+                
             }
         });
         insertAbove.addMouseListener(new MouseAdapter() {
@@ -815,16 +870,14 @@ public class Product extends javax.swing.JPanel {
         popupMenu.add(deleteMenu);
         popupMenu.add(update);
         return popupMenu;
-
+        
     }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton clearData;
     private javax.swing.JButton exportFile;
     private javax.swing.JButton importFile;
     private javax.swing.JButton insertData;
-    private javax.swing.JButton jButton7;
     private javax.swing.JScrollPane jScrollPane9;
     private javax.swing.JToolBar jToolBar4;
     private javax.swing.JToolBar jToolBar5;

@@ -5,17 +5,30 @@
  */
 package shoesmanagementcompany;
 
+import java.awt.Color;
+import java.awt.HeadlessException;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import keeptoo.KButton;
 
 /**
  *
  * @author Pham Ngoc Minh
  */
 public class UserLogin extends javax.swing.JFrame {
+
+    private boolean flag;
+    KButton loginButton = new KButton();
 
     /**
      * Creates new form UserLogin
@@ -25,6 +38,9 @@ public class UserLogin extends javax.swing.JFrame {
         FrameDragListener frameDragListener = new FrameDragListener(this);
         this.addMouseListener(frameDragListener);
         this.addMouseMotionListener(frameDragListener);
+        if (flag == true) {
+            this.setVisible(false);
+        }
     }
 
     /**
@@ -84,6 +100,7 @@ public class UserLogin extends javax.swing.JFrame {
         jPanel2.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 230, 250, 10));
 
         name.setBackground(new java.awt.Color(255, 255, 255));
+        name.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         name.setBorder(null);
         name.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -100,6 +117,11 @@ public class UserLogin extends javax.swing.JFrame {
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(51, 51, 51));
         jLabel4.setText("Quên mật khẩu?");
+        jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel4MouseClicked(evt);
+            }
+        });
         jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 330, 144, 28));
 
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/Icon/icons8_Name_25px_1.png"))); // NOI18N
@@ -120,6 +142,7 @@ public class UserLogin extends javax.swing.JFrame {
         jPanel2.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 0, -1, 33));
 
         password.setBackground(new java.awt.Color(255, 255, 255));
+        password.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         password.setBorder(null);
         password.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -137,9 +160,20 @@ public class UserLogin extends javax.swing.JFrame {
         kButton1.setkHoverForeGround(new java.awt.Color(102, 102, 102));
         kButton1.setkHoverStartColor(new java.awt.Color(0, 153, 255));
         kButton1.setkSelectedColor(new java.awt.Color(204, 204, 255));
+        kButton1.setOpaque(false);
+        kButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                kButton1MouseClicked(evt);
+            }
+        });
         kButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 kButton1ActionPerformed(evt);
+            }
+        });
+        kButton1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                kButton1KeyPressed(evt);
             }
         });
         jPanel2.add(kButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 260, 140, 40));
@@ -181,35 +215,178 @@ public class UserLogin extends javax.swing.JFrame {
 
     private void kButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kButton1ActionPerformed
         // TODO add your handling code here:
-        new MainFrame().setVisible(true);
-        this.setVisible(false);
+        ConnectionDB conn = new ConnectionDB();
+        Connection c = conn.getConnect();
+        String sql = " SELECT * FROM quanlybangiay.admin;";
+
+        try {
+            PreparedStatement pst = c.prepareStatement(sql);
+
+            ResultSet rs = pst.executeQuery();
+            flag = true;
+            while (rs.next()) {
+                if (name.getText().equals(rs.getString(2)) && password.getText().equals(rs.getString(3))) {
+                    flag = true;
+                    break;
+                } else {
+                    flag = false;
+                }
+            }
+            if (flag) {
+                new MainFrame().setVisible(true);
+                this.setVisible(false);
+            } else {
+                JOptionPane.showMessageDialog(null, "Tên đăng nhập hoặc mật khẩu không đúng!");
+                jPanel2.remove(kButton1);
+
+                repaintLoginButton(loginButton);
+            }
+        } catch (Exception e) {
+        }
+
     }//GEN-LAST:event_kButton1ActionPerformed
 
     private void nameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameActionPerformed
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_nameActionPerformed
 
     private void nameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nameKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode() == KeyEvent.VK_ENTER && !name.getText().isEmpty()) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER && !name.getText().isEmpty()) {
             password.requestFocus();
-        }
-        else if(name.getText().isEmpty()) {
+        } else if (name.getText().isEmpty()) {
             name.requestFocus();
         }
     }//GEN-LAST:event_nameKeyPressed
 
     private void passwordKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode() == KeyEvent.VK_ENTER && password.getPassword().toString().equals("1234")) {
-            new MainFrame().setVisible(true);
-            this.setVisible(false);
-        }
-        else if(password.getPassword().toString().isEmpty()){
+        ConnectionDB conn = new ConnectionDB();
+        Connection c = conn.getConnect();
+        String sql = " SELECT * FROM quanlybangiay.admin;";
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            try {
+                PreparedStatement pst = c.prepareStatement(sql);
+
+                ResultSet rs = pst.executeQuery();
+                flag = true;
+                while (rs.next()) {
+                    if (name.getText().equals(rs.getString(2)) && password.getText().equals(rs.getString(3))) {
+                        flag = true;
+                        break;
+                    } else {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    new MainFrame().setVisible(true);
+                    this.setVisible(false);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Tên đăng nhập hoặc mật khẩu không đúng!");
+                    jPanel2.remove(kButton1);
+
+                    repaintLoginButton(loginButton);
+                }
+            } catch (Exception e) {
+            }
+        } else if (password.getPassword().toString().isEmpty()) {
             password.requestFocus();
         }
+
     }//GEN-LAST:event_passwordKeyPressed
+
+    private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
+        JOptionPane.showMessageDialog(null, "Liên hệ đến số điện thoại 0969160198 \nđể lấy lại mật khẩu!");
+    }//GEN-LAST:event_jLabel4MouseClicked
+    private void repaintLoginButton(KButton loginButton) {
+        loginButton.setBorder(null);
+        loginButton.setText("ĐĂNG NHẬP");
+        loginButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        loginButton.setkBackGroundColor(new java.awt.Color(204, 204, 204));
+        loginButton.setkEndColor(new java.awt.Color(85, 119, 255));
+        loginButton.setkHoverEndColor(new java.awt.Color(255, 255, 102));
+        loginButton.setkHoverForeGround(new java.awt.Color(102, 102, 102));
+        loginButton.setkHoverStartColor(new java.awt.Color(0, 153, 255));
+        loginButton.setkSelectedColor(new java.awt.Color(204, 204, 255));
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ConnectionDB conn = new ConnectionDB();
+                Connection c = conn.getConnect();
+                String sql = " SELECT * FROM quanlybangiay.admin;";
+
+                try {
+                    PreparedStatement pst = c.prepareStatement(sql);
+
+                    ResultSet rs = pst.executeQuery();
+                    flag = true;
+                    while (rs.next()) {
+                        if (name.getText().equals(rs.getString(2)) && password.getText().equals(rs.getString(3))) {
+                            flag = true;
+                            break;
+                        } else {
+                            flag = false;
+                        }
+                    }
+                    if (flag) {
+                        new MainFrame().setVisible(true);
+
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Tên đăng nhập hoặc mật khẩu không đúng!");
+                        jPanel2.remove(loginButton);
+                        KButton button = new KButton();
+                        repaintLoginButton(button);
+                    }
+                } catch (HeadlessException | SQLException evt) {
+
+                }
+            }
+        });
+        jPanel2.add(loginButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 260, 140, 40));
+
+        jPanel2.revalidate();
+        jPanel2.repaint();
+
+    }
+    private void kButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_kButton1MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_kButton1MouseClicked
+
+    private void kButton1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_kButton1KeyPressed
+        // TODO add your handling code here:
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            ConnectionDB conn = new ConnectionDB();
+            Connection c = conn.getConnect();
+            String sql = " SELECT * FROM quanlybangiay.admin;";
+
+            try {
+                PreparedStatement pst = c.prepareStatement(sql);
+
+                ResultSet rs = pst.executeQuery();
+                flag = true;
+                while (rs.next()) {
+                    if (name.getText().equals(rs.getString(2)) && password.getText().equals(rs.getString(3))) {
+                        flag = true;
+                        break;
+                    } else {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    new MainFrame().setVisible(true);
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Tên đăng nhập hoặc mật khẩu không đúng!");
+                    jPanel2.remove(loginButton);
+                    KButton button = new KButton();
+                    repaintLoginButton(button);
+                }
+            } catch (HeadlessException | SQLException e) {
+
+            }
+        }
+    }//GEN-LAST:event_kButton1KeyPressed
 
     /**
      * @param args the command line arguments
@@ -222,7 +399,7 @@ public class UserLogin extends javax.swing.JFrame {
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
+                if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
@@ -231,7 +408,7 @@ public class UserLogin extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
+
         //</editor-fold>
 
         /* Create and display the form */
@@ -262,7 +439,7 @@ public class UserLogin extends javax.swing.JFrame {
     private javax.swing.JTextField name;
     private javax.swing.JPasswordField password;
     // End of variables declaration//GEN-END:variables
-    
+
     public static class FrameDragListener extends MouseAdapter {
 
         private final JFrame frame;

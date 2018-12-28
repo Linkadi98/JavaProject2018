@@ -15,14 +15,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,8 +48,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
+import org.apache.poi.xwpf.usermodel.TableRowAlign;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -81,10 +87,7 @@ public class Supplier extends javax.swing.JPanel {
         exportFile = new javax.swing.JButton();
         jToolBar5 = new javax.swing.JToolBar();
         viewData = new javax.swing.JButton();
-        clearData = new javax.swing.JButton();
         insertData = new javax.swing.JButton();
-        jToolBar6 = new javax.swing.JToolBar();
-        jButton7 = new javax.swing.JButton();
         searchBox = new javax.swing.JTextField();
         properties = new javax.swing.JComboBox<>();
 
@@ -156,16 +159,6 @@ public class Supplier extends javax.swing.JPanel {
         });
         jToolBar5.add(viewData);
 
-        clearData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Delete_Database_37px.png"))); // NOI18N
-        clearData.setToolTipText("Xoá bảng");
-        clearData.setOpaque(false);
-        clearData.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clearDataActionPerformed(evt);
-            }
-        });
-        jToolBar5.add(clearData);
-
         insertData.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Add_Database_37px.png"))); // NOI18N
         insertData.setToolTipText("Thêm");
         insertData.setOpaque(false);
@@ -176,27 +169,9 @@ public class Supplier extends javax.swing.JPanel {
         });
         jToolBar5.add(insertData);
 
-        jToolBar6.setBackground(new java.awt.Color(255, 255, 255));
-        jToolBar6.setRollover(true);
-
-        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/shoesmanagementcompany/IconColor/icons8_Combo_Chart_37px.png"))); // NOI18N
-        jButton7.setToolTipText("Thống kê");
-        jButton7.setOpaque(false);
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton7ActionPerformed(evt);
-            }
-        });
-        jToolBar6.add(jButton7);
-
         searchBox.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        searchBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                searchBoxActionPerformed(evt);
-            }
-        });
 
-        properties.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Chọn", "Mã nhà cung cấp", "Tên nhà cung cấp", "Địa chỉ" }));
+        properties.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tìm kiếm theo", "Mã nhà cung cấp", "Tên nhà cung cấp", "Địa chỉ nhà cung cấp" }));
         properties.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 propertiesActionPerformed(evt);
@@ -213,14 +188,12 @@ public class Supplier extends javax.swing.JPanel {
                         .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(29, 29, 29)
+                        .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 12, Short.MAX_VALUE)
+                        .addGap(12, 12, 12)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 1186, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -228,18 +201,13 @@ public class Supplier extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 594, Short.MAX_VALUE))
+                    .addComponent(jToolBar4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(properties, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -259,7 +227,7 @@ public class Supplier extends javax.swing.JPanel {
             return;
         }
         // chỗ này sẽ delete hết các dòng trước khi nhập dữ liệu từ file
-
+        ((DefaultTableModel) tableSupplier.getModel()).setNumRows(0);
         // vector lưu tên cột
         Vector columns = new Vector();
         try {
@@ -310,53 +278,117 @@ public class Supplier extends javax.swing.JPanel {
     }//GEN-LAST:event_importFileActionPerformed
 
     private void exportFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFileActionPerformed
-        // TODO add your handling code here:
-        try {
-            // mở file word, trong đó file word trích đường dẫn như ví dụ bên dưới
-            FileInputStream fis = new FileInputStream(System.getProperty("user.home") + "\\Desktop\\TestWord.docx");
-            XWPFDocument xdoc = new XWPFDocument(OPCPackage.open(fis));
-            // con trỏ duyệt phần thân của file word
-            Iterator bodyElementIterator = xdoc.getBodyElementsIterator();
-            // duyệt phần body
-            while (bodyElementIterator.hasNext()) {
-                IBodyElement element = (IBodyElement) bodyElementIterator.next();
-                // lấy tất cả các bảng trong phần body
-                if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
-                    java.util.List<XWPFTable> tableList = element.getBody().getTables();
-                    // giờ xử lý với từng bảng, vì trong biểu mẫu chỉ có một bảng nên nó sẽ chỉ xử lý 1 lần
-                    for (XWPFTable table : tableList) {
-                        setDefaultTable(table);
-                        for (int i = 1; i < table.getRows().size(); i++) {
-                            for (int j = 0; j < table.getRow(i).getTableCells().size(); j++) {
-                                removeParagraphs(table.getRow(i).getCell(j));
-                                XWPFParagraph paragraph = table.getRow(i).getCell(j).addParagraph();
-                                paragraph.createRun().setText(tableSupplier.getValueAt(i - 1, j).toString());
-                            }
+        String fileName = null;
+        String f0 = System.getProperty("user.home");
+        String f1 = "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\Quản Lý Nhà Cung Cấp\\";
+        String f2 = null;
+        String sql = null;
 
+        if (properties.getSelectedItem().toString().equals("Chọn") || searchBox.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "Bạn phải chọn tiêu chuẩn tìm kiếm");
+            return;
+        }
+
+        if (properties.getSelectedItem().toString().equals("Mã nhà cung cấp")) {
+            f2 = "Tìm kiếm theo mã nhà cung cấp.docx";
+            sql = "SELECT * FROM quanlybangiay.nhacungcap\n"
+                    + "where maNCC = \"" + searchBox.getText() + "\";";
+
+        } else if (properties.getSelectedItem().toString().equals("Tên nhà cung cấp")) {
+            f2 = "Tìm kiếm theo tên nhà cung cấp.docx";
+            sql = "SELECT * FROM quanlybangiay.nhacungcap\n"
+                    + "where tenNCC like \"%" + searchBox.getText() + "%\";";
+        } else if (properties.getSelectedItem().toString().equals("Địa chỉ nhà cung cấp")) {
+            f2 = "Tìm kiếm theo địa chỉ nhà cung cấp.docx";
+            sql = "SELECT * FROM quanlybangiay.nhacungcap\n"
+                    + "where diaChi like \"%" + searchBox.getText() + "%\";";
+        }
+
+        fileName = f0 + f1 + f2;
+
+        try {
+            InputStream file = new FileInputStream(fileName);
+            XWPFDocument docx = new XWPFDocument(OPCPackage.open(file));
+            Iterator bodyElementIterator = docx.getBodyElementsIterator();
+            //Nếu là xuất phiếu mượn thì sửa form
+
+            for (XWPFParagraph p : docx.getParagraphs()) {
+                List<XWPFRun> runs = p.getRuns();
+                if (runs != null) {
+                    for (XWPFRun r : runs) {
+                        r.setFontSize(12);
+                        r.setFontFamily("Times New Roman");
+                        String text = r.getText(0);
+                        if (text != null) {
+                            if (text.contains("ngayxxx")) {
+                                SimpleDateFormat day = new SimpleDateFormat("dd");
+                                SimpleDateFormat month = new SimpleDateFormat("MM");
+                                SimpleDateFormat year = new SimpleDateFormat("yyyy");
+                                Date date = new Date();
+                                String ngay = day.format(date);
+                                String thang = month.format(date);
+                                String nam = year.format(date);
+                                text = text.replace("ngayxxx", "Ngày  " + ngay + "  Tháng  " + thang + "  Năm  " + nam);
+                                r.setText(text, 0);
+                                break;
+                            }
                         }
-                        addRowData(table, table.getRows().size());
                     }
                 }
             }
-            OutputStream out = new FileOutputStream(System.getProperty("user.home") + "\\Desktop\\TestWord.docx");
-            xdoc.write(out);
-            out.close();
 
-        } catch (IOException | InvalidFormatException ex) {
-        }
-        int dialogResult = JOptionPane.showConfirmDialog(null, "File đã tạo thành công!\nBạn có muốn mở file?");
-        if (dialogResult == JOptionPane.YES_OPTION) {
-            if (Desktop.isDesktopSupported()) {
-                try {
-                    File myFile = new File(System.getProperty("user.home") + "\\Desktop\\TestWord.docx");
-                    Desktop.getDesktop().open(myFile);
-                } catch (IOException ex) {
-                    // no application registered for PDFs
+            while (bodyElementIterator.hasNext()) {
+                IBodyElement element = (IBodyElement) bodyElementIterator.next();
+                if ("TABLE".equalsIgnoreCase(element.getElementType().name())) {
+                    //Danh sách tất cả Table trong file word
+                    List<XWPFTable> tableList = element.getBody().getTables();
+
+                    for (XWPFTable table : tableList) {
+                        //Căn bảng ở giữa file
+                        table.setTableAlignment(TableRowAlign.CENTER);
+                        //  Xóa các dòng thừa trước khi thêm mới
+                        while (table.getRow(1) != null) {
+                            table.removeRow(1);
+                        }
+                        int i = 0;
+                        //Thêm các dòng từ jTable vào table trong word
+                        PreparedStatement ps = null;
+                        Connection connection = ConnectionDB.getConnect();
+                        try {
+                            ps = connection.prepareStatement(sql);
+                            ResultSet rs = ps.executeQuery();
+                            while (rs.next()) {
+                                XWPFTableRow newRow = table.createRow();
+                                newRow.getCell(0).setText(++i + "");                               
+                                for (int j = 1; j < 4; j++) {
+
+                                    newRow.getCell(j).setText(rs.getString(j));
+                                }
+                            }
+                        } catch (SQLException ex) {
+                            Logger.getLogger(Supplier.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                    }
                 }
             }
-        } else {
-        }
+            OutputStream fOut = new FileOutputStream(f2);
+            docx.write(fOut);
+            fOut.close();
+            //Mở file
+            try {
+                File myFile = new File(f0 + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\" + f2);
+                Desktop.getDesktop().open(myFile);
+            } catch (IOException ex) {
+                // no application registered for PDFs
+                JOptionPane.showConfirmDialog(null, ex.getMessage());
+                ex.printStackTrace();
+            }
 
+        } catch (IOException | InvalidFormatException ex) {
+            JOptionPane.showConfirmDialog(null, ex.getMessage());
+            Logger.getLogger(Import.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_exportFileActionPerformed
 
     private void viewDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewDataActionPerformed
@@ -384,27 +416,6 @@ public class Supplier extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Error: " + ex.getErrorCode());
         }
     }//GEN-LAST:event_viewDataActionPerformed
-
-    private void clearDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearDataActionPerformed
-        // TODO add your handling code here:
-        int dialog = JOptionPane.showConfirmDialog(null, "Hành động này sẽ xoá toàn bộ dữ liệu \nBạn có muốn tiếp tục không?\nTip: Nếu bạn không chắc chắn, hãy kiểm tra lại hoặc xoá lần lượt từng hàng một!", "Cảnh báo", JOptionPane.INFORMATION_MESSAGE);
-
-        if (dialog == JOptionPane.YES_OPTION) {
-            ConnectionDB connectionDB = new ConnectionDB();
-            Connection con = connectionDB.getConnect();
-
-            String sql = "deletle from quanlybangiay.nhavien";
-            try {
-                con.setAutoCommit(false);
-                PreparedStatement pst = con.prepareStatement(sql);
-                pst.execute();
-                con.commit();
-                JOptionPane.showMessageDialog(null, "Thành công!");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Không thể xoá dữ liệu\n" + "Lỗi: " + e.getMessage());
-            }
-        }
-    }//GEN-LAST:event_clearDataActionPerformed
 
     private void insertDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertDataActionPerformed
         // TODO add your handling code here:
@@ -438,11 +449,6 @@ public class Supplier extends javax.swing.JPanel {
         JOptionPane.showMessageDialog(null, "Successfully");
     }//GEN-LAST:event_insertDataActionPerformed
 
-    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        // TODO add your handling code here:
-        new ChartFrame().setVisible(true);
-    }//GEN-LAST:event_jButton7ActionPerformed
-
     private void tableSupplierMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableSupplierMouseReleased
         // TODO add your handling code here:
         tableSupplier.addMouseListener(new MouseAdapter() {
@@ -471,8 +477,8 @@ public class Supplier extends javax.swing.JPanel {
     }//GEN-LAST:event_tableSupplierMouseReleased
 
     private void tableSupplierKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tableSupplierKeyPressed
-         // TODO add your handling code here:
-         if (evt.getKeyCode() == KeyEvent.VK_ENTER && tableSupplier.getSelectedRow() == tableSupplier.getRowCount() - 1) {
+        // TODO add your handling code here:
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER && tableSupplier.getSelectedRow() == tableSupplier.getRowCount() - 1) {
 
             ((DefaultTableModel) tableSupplier.getModel()).addRow(new Object[]{null});
         }
@@ -496,58 +502,57 @@ public class Supplier extends javax.swing.JPanel {
         if (selected != null) {
             switch (selected) {
                 case "Mã nhà cung cấp":
-                try {
-                    ((DefaultTableModel) tableSupplier.getModel()).setNumRows(0);
-                    String sql = "SELECT * FROM quanlybangiay.nhacungcap WHERE maNCC like '%" + searchBox.getText() + "%'";
-                    Statement st = con.createStatement();
-                    ResultSet rs = st.executeQuery(sql);
-                    while (rs.next()) {
-                        Vector<String> vector = new Vector<>();
-                        for (int i = 0; i < 3; i++) {
-                            vector.add(rs.getString(i + 1));
+                    try {
+                        ((DefaultTableModel) tableSupplier.getModel()).setNumRows(0);
+                        String sql = "SELECT * FROM quanlybangiay.nhacungcap WHERE maNCC like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                        while (rs.next()) {
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 3; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableSupplier.getModel()).addRow(vector);
                         }
-                        ((DefaultTableModel) tableSupplier.getModel()).addRow(vector);
+                        
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    System.out.println("done");
-                } catch (SQLException ex) {
-                    Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                break;
+                    break;
                 case "Tên nhà cung cấp":
-                try {
-                    ((DefaultTableModel) tableSupplier.getModel()).setNumRows(0);
-                    String sql = "select * from quanlybangiay.nhacungcap where tenNCC like '%" + searchBox.getText() + "%'";
-                    Statement st = con.createStatement();
-                    ResultSet rs = st.executeQuery(sql);
+                    try {
+                        ((DefaultTableModel) tableSupplier.getModel()).setNumRows(0);
+                        String sql = "select * from quanlybangiay.nhacungcap where tenNCC like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
 
-                    while (rs.next()) {
-                        Vector<String> vector = new Vector<>();
-                        for (int i = 0; i < 3; i++) {
-                            vector.add(rs.getString(i + 1));
+                        while (rs.next()) {
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 3; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableSupplier.getModel()).addRow(vector);
                         }
-                        ((DefaultTableModel) tableSupplier.getModel()).addRow(vector);
+                    } catch (Exception e) {
                     }
-                } catch (Exception e) {
-                }
-                break;
-                case "Địa chỉ":
-                try {
-                    ((DefaultTableModel) tableSupplier.getModel()).setNumRows(0);
-                    String sql = "select * from quanlybangiay.nhacungcap where diaChi like '%" + searchBox.getText() + "%'";
-                    Statement st = con.createStatement();
-                    ResultSet rs = st.executeQuery(sql);
+                    break;
+                case "Địa chỉ nhà cung cấp":
+                    try {
+                        ((DefaultTableModel) tableSupplier.getModel()).setNumRows(0);
+                        String sql = "select * from quanlybangiay.nhacungcap where diaChi like '%" + searchBox.getText() + "%'";
+                        Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
 
-                    while (rs.next()) {
-                        Vector<String> vector = new Vector<>();
-                        for (int i = 0; i < 3; i++) {
-                            vector.add(rs.getString(i + 1));
+                        while (rs.next()) {
+                            Vector<String> vector = new Vector<>();
+                            for (int i = 0; i < 3; i++) {
+                                vector.add(rs.getString(i + 1));
+                            }
+                            ((DefaultTableModel) tableSupplier.getModel()).addRow(vector);
                         }
-                        ((DefaultTableModel) tableSupplier.getModel()).addRow(vector);
+                    } catch (Exception e) {
                     }
-                } catch (Exception e) {
-                }
-                break;
-                
+                    break;
 
             }
         }
@@ -562,14 +567,13 @@ public class Supplier extends javax.swing.JPanel {
         JMenuItem insertAbove = new JMenuItem("Insert Above");
         JMenuItem insertBelow = new JMenuItem("Insert Below");
         JMenuItem update = new JMenuItem("Update");
-        Icon icon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-cancel-16.png");
-        Icon deleteDb = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-delete-database-20.png");
-        Icon deleteTb = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-delete-table-25.png");
-        Icon updateIcon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-downloading-updates-20.png");
-        Icon insertIcon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-add-row-25.png");
-        Icon insertBelowIcon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-down-arrow-25.png");
-        Icon insertAboveIcon = new ImageIcon("C:\\Users\\Pham Ngoc Minh\\Downloads\\Icon\\icons8-long-arrow-up-25.png");
-        insertMenu.setIcon(insertIcon);
+        Icon icon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-cancel-16.png");
+        Icon deleteDb = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-delete-database-20.png");
+        Icon deleteTb = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-delete-table-25.png");
+        Icon updateIcon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-downloading-updates-20.png");
+        Icon insertIcon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-add-row-25.png");
+        Icon insertBelowIcon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-down-arrow-25.png");
+        Icon insertAboveIcon = new ImageIcon(System.getProperty("user.home") + "\\Documents\\NetBeansProjects\\ShoesManagementCompany\\src\\shoesmanagementcompany\\IconColor\\icons8-long-arrow-up-25.png");     insertMenu.setIcon(insertIcon);
         insertAbove.setIcon(insertAboveIcon);
         insertBelow.setIcon(insertBelowIcon);
         deleteMenu.setIcon(icon);
@@ -722,15 +726,12 @@ public class Supplier extends javax.swing.JPanel {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton clearData;
     private javax.swing.JButton exportFile;
     private javax.swing.JButton importFile;
     private javax.swing.JButton insertData;
-    private javax.swing.JButton jButton7;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JToolBar jToolBar4;
     private javax.swing.JToolBar jToolBar5;
-    private javax.swing.JToolBar jToolBar6;
     private javax.swing.JComboBox<String> properties;
     private javax.swing.JTextField searchBox;
     public javax.swing.JTable tableSupplier;
